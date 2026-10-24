@@ -18,52 +18,28 @@ import { Scale, ShieldCheck, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
 import { BatchScanProvider, useBatchScan } from './context/BatchScanContext';
 import { toPersianDigits } from './utils/persian';
 
+import {
+  initializeDatabase,
+  dbSaveDocuments,
+  dbSavePelaks,
+  dbSaveDisputes,
+  dbSaveTimeline,
+  dbClearAll,
+} from './utils/indexedDb';
+
 function AppInner() {
   // Vault lock status: if a passcode is already saved, start locked; otherwise unlocked for first setup
   const [isVaultLocked, setIsVaultLocked] = useState<boolean>(() => {
     return !!localStorage.getItem('attorney_vault_passcode');
   });
 
-  // Load real data from localStorage or start with clean initial arrays
-  const [pelaks, setPelaks] = useState<PelakNode[]>(() => {
-    try {
-      const saved = localStorage.getItem('cadastre_real_pelaks');
-      return saved ? JSON.parse(saved) : INITIAL_PELAKS;
-    } catch {
-      return INITIAL_PELAKS;
-    }
-  });
-
-  const [documents, setDocuments] = useState<LegalDocument[]>(() => {
-    try {
-      const saved = localStorage.getItem('cadastre_real_documents');
-      return saved ? JSON.parse(saved) : INITIAL_DOCUMENTS;
-    } catch {
-      return INITIAL_DOCUMENTS;
-    }
-  });
-
-  const [disputes, setDisputes] = useState<DisputeAlert[]>(() => {
-    try {
-      const saved = localStorage.getItem('cadastre_real_disputes');
-      return saved ? JSON.parse(saved) : INITIAL_DISPUTES;
-    } catch {
-      return INITIAL_DISPUTES;
-    }
-  });
-
-  const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('cadastre_real_timeline');
-      return saved ? JSON.parse(saved) : INITIAL_TIMELINE;
-    } catch {
-      return INITIAL_TIMELINE;
-    }
-  });
-
-  const [selectedPelakId, setSelectedPelakId] = useState<string>(() => {
-    return pelaks.length > 0 ? pelaks[0].id : '';
-  });
+  // State initialized with initial/cached data, then hydrated from high-capacity IndexedDB
+  const [pelaks, setPelaks] = useState<PelakNode[]>(INITIAL_PELAKS);
+  const [documents, setDocuments] = useState<LegalDocument[]>(INITIAL_DOCUMENTS);
+  const [disputes, setDisputes] = useState<DisputeAlert[]>(INITIAL_DISPUTES);
+  const [timeline, setTimeline] = useState<TimelineItem[]>(INITIAL_TIMELINE);
+  const [selectedPelakId, setSelectedPelakId] = useState<string>('');
+  const [isDbLoaded, setIsDbLoaded] = useState<boolean>(false);
 
   const [activeTab, setActiveTab] = useState<'cadastre' | 'documents' | 'timeline' | 'scanner' | 'chat'>('cadastre');
   const [chatInitialQuery, setChatInitialQuery] = useState<string | null>(null);
@@ -71,38 +47,51 @@ function AppInner() {
   // Background Batch Processing state from Context
   const { isProcessingBatch, queue, currentProcessingIndex } = useBatchScan();
 
-  // Sync to secure local storage
+  // 1. Initial Load from high-capacity IndexedDB
   useEffect(() => {
-    try {
-      localStorage.setItem('cadastre_real_pelaks', JSON.stringify(pelaks));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [pelaks]);
+    let isSubscribed = true;
+    initializeDatabase()
+      .then((data) => {
+        if (!isSubscribed) return;
+        setPelaks(data.pelaks);
+        setDocuments(data.documents);
+        setDisputes(data.disputes);
+        setTimeline(data.timeline);
+        if (data.pelaks.length > 0) {
+          setSelectedPelakId((prev) => (prev && data.pelaks.some((p) => p.id === prev) ? prev : data.pelaks[0].id));
+        }
+        setIsDbLoaded(true);
+      })
+      .catch((err) => {
+        console.error('Failed to initialize IndexedDB:', err);
+        setIsDbLoaded(true);
+      });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, []);
+
+  // 2. High-capacity asynchronous IndexedDB persistence (capable of hundreds of MBs of scanned PDFs and images)
+  useEffect(() => {
+    if (!isDbLoaded) return;
+    dbSavePelaks(pelaks);
+  }, [pelaks, isDbLoaded]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('cadastre_real_documents', JSON.stringify(documents));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [documents]);
+    if (!isDbLoaded) return;
+    dbSaveDocuments(documents);
+  }, [documents, isDbLoaded]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('cadastre_real_disputes', JSON.stringify(disputes));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [disputes]);
+    if (!isDbLoaded) return;
+    dbSaveDisputes(disputes);
+  }, [disputes, isDbLoaded]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('cadastre_real_timeline', JSON.stringify(timeline));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [timeline]);
+    if (!isDbLoaded) return;
+    dbSaveTimeline(timeline);
+  }, [timeline, isDbLoaded]);
 
   const selectedPelak = pelaks.find((p) => p.id === selectedPelakId) || (pelaks.length > 0 ? pelaks[0] : null);
 
@@ -409,21 +398,30 @@ function AppInner() {
     setIsVaultLocked(false);
   };
 
-  const handleClearAllData = () => {
+  const handleClearAllData = async () => {
     if (confirm('هشدار: آیا اطمینان دارید که می‌خواهید تمامی داده‌ها، پلاک‌ها و اسناد ثبت‌شده را کاملاً پاکسازی فرمایید؟ این عملیات غیرقابل بازگشت است.')) {
       setPelaks([]);
       setDocuments([]);
       setDisputes([]);
       setTimeline([]);
       setSelectedPelakId('');
+      await dbClearAll();
       localStorage.removeItem('cadastre_real_pelaks');
       localStorage.removeItem('cadastre_real_documents');
       localStorage.removeItem('cadastre_real_disputes');
       localStorage.removeItem('cadastre_real_timeline');
+      localStorage.removeItem('cadaster_legal_chat_sessions_v2');
+      localStorage.removeItem('cadaster_legal_chat_active_session_id');
     }
   };
 
   const handleExportBackup = () => {
+    let chatSessions = [];
+    try {
+      const stored = localStorage.getItem('cadaster_legal_chat_sessions_v2');
+      if (stored) chatSessions = JSON.parse(stored);
+    } catch {}
+
     const backupData: VaultBackupData = {
       version: '1.0.0',
       exportedAt: new Date().toISOString(),
@@ -431,6 +429,7 @@ function AppInner() {
       documents,
       disputes,
       timeline,
+      chatSessions,
     };
     const jsonStr = JSON.stringify(backupData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });

@@ -1,4 +1,5 @@
 import { ChatSession, ChatMessage } from '../types/cadastre';
+import { dbSaveChatSessions } from './indexedDb';
 
 const STORAGE_KEY_SESSIONS = 'cadaster_legal_chat_sessions_v2';
 const STORAGE_KEY_ACTIVE_ID = 'cadaster_legal_chat_active_session_id';
@@ -76,4 +77,5 @@ export function saveStoredSessions(sessions: ChatSession[], activeSessionId: str
   } catch (err) {
     console.warn('Failed to save chat sessions to localStorage:', err);
   }
+  dbSaveChatSessions(sessions).catch((e) => console.error(e));
 }
