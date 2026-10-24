@@ -1,0 +1,6 @@
+{
+  "name": "سامانه اتوماسیون کاداستر و اسناد وکیل",
+  "description": "سامانه جامع مدیریت پرونده‌های ثبتی، کاداستر سلسله‌مراتبی، کشف تعارضات و اسناد معارض و چت‌بات وکیل متصل به آرشیو دادنامه‌ها و پلاک‌ها",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
