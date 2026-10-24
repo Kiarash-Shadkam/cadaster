@@ -76,6 +76,12 @@ export const SecurityVault: React.FC<SecurityVaultProps> = ({
   };
 
   const handleExportBackup = () => {
+    let chatSessions = [];
+    try {
+      const stored = localStorage.getItem('cadaster_legal_chat_sessions_v2');
+      if (stored) chatSessions = JSON.parse(stored);
+    } catch {}
+
     const backupData: VaultBackupData = {
       version: '1.0.0',
       exportedAt: new Date().toISOString(),
@@ -83,6 +89,7 @@ export const SecurityVault: React.FC<SecurityVaultProps> = ({
       documents,
       disputes,
       timeline,
+      chatSessions,
     };
     const jsonStr = JSON.stringify(backupData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -102,8 +109,13 @@ export const SecurityVault: React.FC<SecurityVaultProps> = ({
       try {
         const parsed = JSON.parse(event.target?.result as string);
         if (parsed && Array.isArray(parsed.pelaks)) {
+          if (parsed.chatSessions && Array.isArray(parsed.chatSessions)) {
+            try {
+              localStorage.setItem('cadaster_legal_chat_sessions_v2', JSON.stringify(parsed.chatSessions));
+            } catch {}
+          }
           onRestoreBackup(parsed);
-          alert('پشتیبان پرونده‌های ثبتی با موفقیت بازیابی شد.');
+          alert('پشتیبان پرونده‌ها، اسناد و جلسات مشاوره با موفقیت بازیابی شد.');
         } else {
           alert('فرمت فایل پشتیبان معتبر نیست.');
         }

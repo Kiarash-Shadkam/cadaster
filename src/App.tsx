@@ -583,7 +583,8 @@ function AppInner() {
           />
         </div>
 
-        {activeTab === 'chat' && (
+        {/* Legal Chatbot is kept mounted in hidden div to guarantee persistent state, multi-tab sessions, and zero loss on navbar switching */}
+        <div className={activeTab === 'chat' ? 'block' : 'hidden'}>
           <LegalChatbot
             pelaks={pelaks}
             documents={documents}
@@ -594,7 +595,7 @@ function AppInner() {
             initialQuery={chatInitialQuery}
             onGoToScanner={() => setActiveTab('scanner')}
           />
-        )}
+        </div>
       </main>
 
       {/* Persistent Background Batch Processing Floating Indicator */}

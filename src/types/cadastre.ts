@@ -194,6 +194,16 @@ export interface ChatMessage {
   suggestedActions?: string[];
 }
 
+export interface ChatSession {
+  id: string;
+  title: string;
+  pelakId: string;
+  createdAt: number;
+  updatedAt: number;
+  draftInput: string;
+  messages: ChatMessage[];
+}
+
 export interface VaultBackupData {
   version: string;
   exportedAt: string;
@@ -201,5 +211,6 @@ export interface VaultBackupData {
   documents: LegalDocument[];
   disputes: DisputeAlert[];
   timeline: TimelineItem[];
+  chatSessions?: ChatSession[];
 }
 
