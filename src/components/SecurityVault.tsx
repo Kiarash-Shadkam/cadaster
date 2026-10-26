@@ -12,6 +12,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { VaultBackupData, PelakNode, LegalDocument, DisputeAlert, TimelineItem } from '../types/cadastre';
+import { OFFICIAL_PCKALA_VAULT_BACKUP } from '../data/cadastreData';
 
 interface SecurityVaultProps {
   isLocked: boolean;
@@ -251,27 +252,44 @@ export const SecurityVault: React.FC<SecurityVaultProps> = ({
             <span>اسناد و پلاک‌ها منحصراً در مرورگر و حافظه امن سیستم وکیل ذخیره می‌گردند.</span>
           </div>
 
-          <div className="flex items-center justify-between pt-2">
-            <label className="cursor-pointer text-sky-400 hover:text-sky-300 flex items-center gap-1">
-              <Upload className="w-3.5 h-3.5" />
-              <span>بازیابی از فایل پشتیبان</span>
-              <input type="file" accept=".json" onChange={handleImportBackup} className="hidden" />
-            </label>
+          <div className="flex flex-col gap-2 pt-2">
+            <div className="flex items-center justify-between">
+              <label className="cursor-pointer text-sky-400 hover:text-sky-300 flex items-center gap-1">
+                <Upload className="w-3.5 h-3.5" />
+                <span>بازیابی از فایل پشتیبان</span>
+                <input type="file" accept=".json" onChange={handleImportBackup} className="hidden" />
+              </label>
 
-            {storedPasscode && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm('آیا مایلید رمز عبور را بازنشانی فرمایید؟')) {
-                    localStorage.removeItem('attorney_vault_passcode');
-                    setStoredPasscode(null);
-                  }
-                }}
-                className="text-slate-500 hover:text-slate-400"
-              >
-                فراموشی رمز
-              </button>
-            )}
+              {storedPasscode && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm('آیا مایلید رمز عبور را بازنشانی فرمایید؟')) {
+                      localStorage.removeItem('attorney_vault_passcode');
+                      setStoredPasscode(null);
+                    }
+                  }}
+                  className="text-slate-500 hover:text-slate-400"
+                >
+                  فراموشی رمز
+                </button>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm('آیا مایلید پرونده و ۲۰ مدرک شکواییه پی‌سی‌کالا (نسخه ۱.۱.۰) بازیابی شود؟')) {
+                  onRestoreBackup(OFFICIAL_PCKALA_VAULT_BACKUP);
+                  alert('پرونده پی‌سی‌کالا با ۲۰ مدرک و جلسات مشاوره با موفقیت بازیابی شد.');
+                  onUnlock();
+                }
+              }}
+              className="w-full mt-1 py-1.5 px-2 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-700/50 text-emerald-300 hover:text-emerald-200 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Scale className="w-3.5 h-3.5 text-emerald-400" />
+              <span>بارگذاری تک‌کلیک پرونده رسمی پی‌سی‌کالا (نسخه ۱.۱.۰)</span>
+            </button>
           </div>
         </div>
       </div>

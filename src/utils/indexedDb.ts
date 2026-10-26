@@ -1,5 +1,5 @@
 import { PelakNode, LegalDocument, DisputeAlert, TimelineItem, ChatSession } from '../types/cadastre';
-import { INITIAL_PELAKS, INITIAL_DOCUMENTS, INITIAL_DISPUTES, INITIAL_TIMELINE } from '../data/cadastreData';
+import { INITIAL_PELAKS, INITIAL_DOCUMENTS, INITIAL_DISPUTES, INITIAL_TIMELINE, INITIAL_CHAT_SESSIONS } from '../data/cadastreData';
 
 const DB_NAME = 'CadasterAttorneyVaultDB';
 const DB_VERSION = 1;
@@ -303,9 +303,9 @@ export async function initializeDatabase(): Promise<InitialDossierData> {
       // 5. Chat Sessions
       try {
         const savedChats = localStorage.getItem('cadaster_legal_chat_sessions_v2');
-        dbChats = savedChats ? JSON.parse(savedChats) : [];
+        dbChats = savedChats ? JSON.parse(savedChats) : INITIAL_CHAT_SESSIONS;
       } catch {
-        dbChats = [];
+        dbChats = INITIAL_CHAT_SESSIONS;
       }
 
       // Write everything to IndexedDB right away
@@ -333,6 +333,7 @@ export async function initializeDatabase(): Promise<InitialDossierData> {
       documents: INITIAL_DOCUMENTS,
       disputes: INITIAL_DISPUTES,
       timeline: INITIAL_TIMELINE,
+      chatSessions: INITIAL_CHAT_SESSIONS,
     };
   }
 }

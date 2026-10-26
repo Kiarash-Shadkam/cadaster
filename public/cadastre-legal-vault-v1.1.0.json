@@ -1,0 +1,1328 @@
+{
+  "version": "1.0.0",
+  "exportedAt": "2026-10-26T06:17:21.929Z",
+  "pelaks": [
+    {
+      "id": "dossier-general-1792875771816",
+      "code": "کلاسه-1816",
+      "mainNumber": "1816",
+      "sector": "شعبه رسیدگی‌کننده دادگاه / دادسرا",
+      "title": "پی سی کالا شکایت",
+      "areaM2": 0,
+      "ownerName": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+      "status": "valid",
+      "childrenIds": [],
+      "description": "پرونده «پی سی کالا شکایت» با تعداد 20 مدرک پیوست به صورت یکپارچه تجمیع گردید. طرفین اصلی پرونده بر اساس مدارک شامل خواهان/شاکی (علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام (دارنده کارت پرداخت‌کننده)، علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام، علیرضا مهدی‌پور شادکام، علیرضا مهدی پورشادکام، خواهان / موکل پرونده) و طرف مقابل (فروشگاه پی سی کالا (میلاد لعل‌فامی و محمدعلی لعل‌فامی)، فروشگاه پی سی کالا (میلاد لعل‌فامی و محمد علی لعل‌فامی)، میلاد لعل‌فامی و محمد علی لعل‌فامی، خوانده / طرف دعوا) هستند.",
+      "deedType": "پرونده قضایی حقوقی/کیفری",
+      "isNonLandDossier": true,
+      "dossierDomain": "general",
+      "clientRole": "وکیل مدافع / نماینده قانونی با اختیارات تام",
+      "holisticAnalysis": {
+        "synthesisSummary": "پرونده «پی سی کالا شکایت» با تعداد 20 مدرک پیوست به صورت یکپارچه تجمیع گردید. طرفین اصلی پرونده بر اساس مدارک شامل خواهان/شاکی (علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام (دارنده کارت پرداخت‌کننده)، علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام، علیرضا مهدی‌پور شادکام، علیرضا مهدی پورشادکام، خواهان / موکل پرونده) و طرف مقابل (فروشگاه پی سی کالا (میلاد لعل‌فامی و محمدعلی لعل‌فامی)، فروشگاه پی سی کالا (میلاد لعل‌فامی و محمد علی لعل‌فامی)، میلاد لعل‌فامی و محمد علی لعل‌فامی، خوانده / طرف دعوا) هستند.",
+        "caseNarrative": "مجموعه اسناد بارگذاری‌شده نشان‌دهنده یک فرایند حقوقی و قضایی به هم‌پیوسته با مرجعیت شرکت پرداخت الکترونیک سامان کیش (سپ) و شبکه پرداخت الکترونیک شاپرک / درگاه پرداخت فروشگاه پی سی کالا و فروشگاه اینترنتی پی سی کالا (PCKala) و شعبه ۳۸ دادگاه عمومی حقوقی اصفهان (مجتمع قضایی شهید سردار محمدرضا زاهدی) و مرجع رسمی / پیوست پرونده و شبکه بانکی / بانک عامل و دفتر خدمات الکترونیک قضایی / دادسرا و شعبه رسیدگی‌کننده دادگاه / دادسرا و شعبه دادگاه عمومی حقوقی / کیفری و کانون کارشناسان / مرجع انتظامی است. تمامی شواهد دال بر پیگیری حقوقی در راستای استیفای حقوق موکل می‌باشد.",
+        "keyParties": {
+          "clients": [
+            "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام (دارنده کارت پرداخت‌کننده)",
+            "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+            "علیرضا مهدی‌پور شادکام",
+            "علیرضا مهدی پورشادکام",
+            "خواهان / موکل پرونده"
+          ],
+          "opponents": [
+            "فروشگاه پی سی کالا (میلاد لعل‌فامی و محمدعلی لعل‌فامی)",
+            "فروشگاه پی سی کالا (میلاد لعل‌فامی و محمد علی لعل‌فامی)",
+            "میلاد لعل‌فامی و محمد علی لعل‌فامی",
+            "خوانده / طرف دعوا"
+          ],
+          "authorities": [
+            "شرکت پرداخت الکترونیک سامان کیش (سپ)",
+            "شبکه پرداخت الکترونیک شاپرک / درگاه پرداخت فروشگاه پی سی کالا",
+            "فروشگاه اینترنتی پی سی کالا (PCKala)",
+            "شعبه ۳۸ دادگاه عمومی حقوقی اصفهان (مجتمع قضایی شهید سردار محمدرضا زاهدی)",
+            "مرجع رسمی / پیوست پرونده",
+            "شبکه بانکی / بانک عامل",
+            "دفتر خدمات الکترونیک قضایی / دادسرا",
+            "شعبه رسیدگی‌کننده دادگاه / دادسرا",
+            "شعبه دادگاه عمومی حقوقی / کیفری",
+            "کانون کارشناسان / مرجع انتظامی"
+          ]
+        },
+        "evidenceChain": [
+          {
+            "documentTitle": "تاییدیه پرداخت سپ",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (inquiry) در مرجع شرکت پرداخت الکترونیک سامان کیش (سپ)",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "رسید پرداخت",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (inquiry) در مرجع شبکه پرداخت الکترونیک شاپرک / درگاه پرداخت فروشگاه پی سی کالا",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "فاکتور (۸۵۰۴۵)",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (contract) در مرجع فروشگاه اینترنتی پی سی کالا (PCKala)",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "ابلاغیه اصفهان شعبه ۳۸",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (order) در مرجع شعبه ۳۸ دادگاه عمومی حقوقی اصفهان (مجتمع قضایی شهید سردار محمدرضا زاهدی)",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "روند کاری پرونده شعبه ۳۴ اصفهان پی سی کالا",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (deed) در مرجع مرجع رسمی / پیوست پرونده",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "ریاست محترم مرجع رسیدگی 081615",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (inquiry) در مرجع شبکه بانکی / بانک عامل",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "شکواییه کیفری اصفهان پی سی کالا",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (order) در مرجع دفتر خدمات الکترونیک قضایی / دادسرا",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "لایحه شکایت حقوقی مشهد اصفهان پی‌سی کالا",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (minutes) در مرجع شعبه رسیدگی‌کننده دادگاه / دادسرا",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "140520990000960162 1",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (deed) در مرجع مرجع رسمی / پیوست پرونده",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "ابلاغیه اعسار لعل‌فامی",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (deed) در مرجع مرجع رسمی / پیوست پرونده",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد  پی سی کالا",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (order) در مرجع دفتر خدمات الکترونیک قضایی / دادسرا",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (order) در مرجع دفتر خدمات الکترونیک قضایی / دادسرا",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "دادنامه عدم صلاحیت شعبه ۱ خمینی مشهد پی سی کالا",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (verdict) در مرجع شعبه دادگاه عمومی حقوقی / کیفری",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "دادنامه عدم صلاحیت کیفری اصفهان ارجاع به کاشان",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (verdict) در مرجع شعبه دادگاه عمومی حقوقی / کیفری",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "دستور قضایی به پلیس فتا پی سی کالا",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (expert_report) در مرجع کانون کارشناسان / مرجع انتظامی",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "شکایت پی سی کالا به پلیس فتا اصفهان(1)",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (order) در مرجع دفتر خدمات الکترونیک قضایی / دادسرا",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "عدم صلاحیت شکایت حقوقی مشهد شعبه ۱",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (order) در مرجع دفتر خدمات الکترونیک قضایی / دادسرا",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "دادنامه شعبه ۱۱۱ کیفری دو اصفهان (شهید مطهری) چندی از شاکیان",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (verdict) در مرجع شعبه دادگاه عمومی حقوقی / کیفری",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "دادنامه شعبه ۱۱۷۰ کیفری دو تهران قدس ( فائزه سعیدی )",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (verdict) در مرجع شعبه دادگاه عمومی حقوقی / کیفری",
+            "strength": "conclusive"
+          },
+          {
+            "documentTitle": "شاکیان 085417",
+            "roleInCase": "ارائه‌شده به عنوان سند مثبته (deed) در مرجع مرجع رسمی / پیوست پرونده",
+            "strength": "conclusive"
+          }
+        ],
+        "conflictsOrContradictions": [
+          "تعارض ساختاری در متن مدارک اولیه مشاهده نشد؛ تسلسل اسناد با یکدیگر همخوانی دارد."
+        ],
+        "legalStrengths": [
+          "تکمیل مدارک پایه با 20 فقره سند و دادنامه معتبر",
+          "وجود مستندات رسمی و ادله اثباتی مستحکم در راستای مطالبات موکل"
+        ],
+        "legalRisks": [
+          "لزوم رعایت مواعد قانونی اعتراض، تجدیدنظرخواهی یا اجرای مفاد دادنامه‌ها",
+          "بررسی احتمال دفاعیات متقابل یا ادعاهای انکار و تردید از سوی طرف دعوا"
+        ],
+        "recommendedAttorneyActions": [
+          "تنظیم لایحه جامع تجمیعی با ارجاع دقیق به مدارک ضبط‌شده در این پرونده",
+          "اخذ گواهی قطعیت احکام و تقاضای صدور اجراییه از دادگاه رسیدگی‌کننده",
+          "تطبیق اصل مدارک در اولین جلسه رسیدگی یا شعبه اجرای احکام"
+        ],
+        "lastSynthesizedAt": "۱۴۰۵/۸/۲"
+      }
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc-1792875786303-4uax6",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "تاییدیه پرداخت سپ",
+      "category": "inquiry",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "224190156877",
+      "issueDate": "1404/10/14",
+      "authority": "شرکت پرداخت الکترونیک سامان کیش (سپ)",
+      "summary": "گواهی و تاییدیه رسمی شرکت پرداخت الکترونیک سامان کیش (سپ) خطاب به فروشگاه پی سی کالا، دایر بر انجام موفق تراکنش خرید اینترنتی با کارت بانکی شماره ۶۱۰۴۳۳۷۴۵۶۸۱۳۵۷۳ در تاریخ ۱۴۰۴/۱۰/۰۶ ساعت ۱۱:۵۸ به مبلغ ۱،۲۸۷،۴۰۰،۰۰۰ ریال (یکصد و بیست و هشت میلیون و هفتصد و چهل هزار تومان) با شماره مرجع ۲۲۴۱۹۰۱۵۶۸۷۷، شناسه خرید ۱۱۰۷۴۱ و شماره پایانه ۱۳۷۹۳۱۳۰.",
+      "parties": {
+        "claimant": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام (دارنده کارت پرداخت‌کننده)",
+        "defendant": "فروشگاه پی سی کالا (میلاد لعل‌فامی و محمدعلی لعل‌فامی)",
+        "buyer": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "low",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "conflictingDeedNumbers": [],
+        "forgeryIndicators": [],
+        "nextActionNeeded": "پیوست تاییدیه پرداخت به شکواییه یا دادخواست استرداد وجه و اثبات واریز ثمن معامله به حساب فروشگاه",
+        "referencedCaseNumbers": [
+          "کلاسه-1816"
+        ],
+        "referencedContractDates": [
+          "1404/10/06"
+        ],
+        "relevantLegalArticles": [
+          "ماده ۳۶۲ قانون مدنی",
+          "ماده ۲۶۵ قانون مدنی",
+          "ماده ۱ و ۲ قانون تشدید مجازات مرتکبین ارتشاء، اختلاس و کلاهبرداری"
+        ],
+        "verdictOutcome": "تایید واریز قطعی و موفق مبلغ ۱،۲۸۷،۴۰۰،۰۰۰ ریال به حساب درگاه پی سی کالا"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "تاییدیه پرداخت سپ.pdf",
+      "fileSize": 141280,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792875812196-sy7e8",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "رسید پرداخت",
+      "category": "inquiry",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "224190140061",
+      "issueDate": "1402/10/06",
+      "authority": "شبکه پرداخت الکترونیک شاپرک / درگاه پرداخت فروشگاه پی سی کالا",
+      "summary": "تأییدیه تراکنش موفق پرداخت الکترونیک اینترنتی به مبلغ ۱,۲۸۶,۵۰۰,۰۰۰ ریال (معادل ۱۲۸ میلیون و ۶۵۰ هزار تومان) در وجه «فروشگاه پی سی کالا» در تاریخ ۱۴۰۲/۱۰/۰۶ ساعت ۱۱:۵۶. تراکنش با شماره کارت مبدأ منتهی به ۹۵۹۸ (بانک ملت)، شماره مرجع (RRN) ۲۲۴۱۹۰۱۴۰۰۶۱، شماره پایانه ۱۳۷۹۳۱۳۰، شناسه خرید ۱۱۰۷۴۲ و رسید دیجیتالی ثبت شده و وضعیت آن تأیید شده است که به عنوان دلیل اثباتی پرداخت ثمن و عدم ایفای تعهد در پرونده قابل استناد است.",
+      "parties": {
+        "claimant": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+        "defendant": "فروشگاه پی سی کالا (میلاد لعل‌فامی و محمد علی لعل‌فامی)",
+        "buyer": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "low",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "conflictingDeedNumbers": [],
+        "forgeryIndicators": [],
+        "nextActionNeeded": "ارائه پرینت رسمی تراکنش به همراه استعلام از شرکت پرداخت الکترونیک (شاپرک) یا بانک مبدأ جهت پیوست به لایحه یا شکواییه کلاهبرداری/عدم تحویل مبیع",
+        "referencedCaseNumbers": [
+          "1816"
+        ],
+        "referencedContractDates": [
+          "1402/10/06"
+        ],
+        "relevantLegalArticles": [
+          "ماده ۳۶۲ قانون مدنی",
+          "ماده ۳۶۷ قانون مدنی",
+          "ماده ۱ و ۲ قانون تشدید مجازات مرتکبین ارتشاء، اختلاس و کلاهبرداری",
+          "ماده ۱۳ قانون جرایم رایانه‌ای"
+        ],
+        "verdictOutcome": "تأیید پرداخت قطعی وجه به مبلغ ۱,۲۸۶,۵۰۰,۰۰۰ ریال به حساب درگاه فروشگاه پی سی کالا"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "رسید پرداخت.pdf",
+      "fileSize": 255374,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792875835585-3avoh",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "فاکتور (۸۵۰۴۵)",
+      "category": "contract",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "85045",
+      "issueDate": "1404/10/06",
+      "authority": "فروشگاه اینترنتی پی سی کالا (PCKala)",
+      "summary": "فاکتور الکترونیکی سفارش شماره ۸۵۰۴۵ متعلق به خریدار علیرضا مهدی‌پور شادکام از فروشگاه پی سی کالا به ارزش ۱۲۸,۷۴۰,۰۰۰ تومان؛ بابت یک دستگاه لپ‌تاپ لنوو Lenovo LOQ-AA Core i7 (با مشخصات رم ۲۴ گیگابایت، حافظه ۵۱۲ گیگابایت SSD و گرافیک RTX 5060) پرداختی از طریق درگاه 'پی سی کالا پی' با شناسه تراکنش ۱۱۰۷۴۱ مورخ ۱۴۰۴/۱۰/۰۶.",
+      "parties": {
+        "claimant": "علیرضا مهدی‌پور شادکام",
+        "defendant": "فروشگاه پی سی کالا (میلاد لعل‌فامی و محمد علی لعل‌فامی)",
+        "buyer": "علیرضا مهدی‌پور شادکام",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "conflictingDeedNumbers": [],
+        "forgeryIndicators": [],
+        "nextActionNeeded": "ارائه فاکتور همراه با رسید پرداخت ۱۱۰۷۴۱ به عنوان دلیل اثبات وقوع عقد بیع و واریز ثمن معامله در دادخواست یا شکواییه مطالبه مبیع یا استرداد وجه",
+        "referencedCaseNumbers": [
+          "کلاسه-1816"
+        ],
+        "referencedContractDates": [
+          "1404/10/06"
+        ],
+        "relevantLegalArticles": [
+          "ماده ۳۳۸ قانون مدنی",
+          "ماده ۳۶۲ قانون مدنی",
+          "قانون تجارت الکترونیکی"
+        ],
+        "verdictOutcome": "تایید ثبت سفارش کالا به مبلغ ۱۲۸,۷۴۰,۰۰۰ تومان با شناسه تراکنش ۱۱۰۷۴۱"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "فاکتور (۸۵۰۴۵).pdf",
+      "fileSize": 85335,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792875901120-4tnw9",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "ابلاغیه اصفهان شعبه ۳۸",
+      "category": "order",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "140509100052075997",
+      "issueDate": "1405/07/22",
+      "authority": "شعبه ۳۸ دادگاه عمومی حقوقی اصفهان (مجتمع قضایی شهید سردار محمدرضا زاهدی)",
+      "summary": "ابلاغ اخطاریه و احضاریه جهت حضور در جلسه رسیدگی مورخ ۱۴۰۵/۰۸/۰۶ ساعت ۱۲:۳۰ شعبه ۳۸ حقوقی اصفهان به مخاطب (علیرضا مهدی پورشادکام). دستورات دادگاه شامل: ۱- الزام به معرفی و حضور گواهان دارای ثنا و امضای الکترونیک جهت استماع شهادت شهود؛ ۲- ارائه اصول اسناد و مدارک؛ ۳- اخذ توضیح پیرامون درآمد و معیشت خواهان؛ ۴- تعیین مهلت ۷ روزه برای تودیع مبلغ ۵۰۰،۰۰۰،۰۰۰ ریال خسارت احتمالی جهت صدور قرار تامین خواسته؛ ۵- ابطال وقت رسیدگی قبلی مورخ ۱۴۰۵/۱۰/۱۴.",
+      "parties": {
+        "claimant": "علیرضا مهدی پورشادکام",
+        "defendant": "میلاد لعل‌فامی و محمد علی لعل‌فامی",
+        "buyer": "",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "conflictingDeedNumbers": [],
+        "forgeryIndicators": [],
+        "nextActionNeeded": "تودیع فوری خسارت احتمالی به مبلغ ۵۰۰ میلیون ریال ظرف مهلت ۷ روز جهت صدور تامین خواسته، هماهنگی با شهود جهت ثبت‌نام ثنا و حضور در وقت رسیدگی، و ارسال لایحه دفاعیه به همراه اصول اسناد",
+        "referencedCaseNumbers": [
+          "140525920001770924",
+          "0501000"
+        ],
+        "referencedContractDates": [
+          "1405/08/06",
+          "1405/10/14"
+        ],
+        "relevantLegalArticles": [
+          "ماده ۱۰۸ قانون آیین دادرسی مدنی (تامین خواسته)",
+          "ماده ۲۳۰ الی ۲۴۱ قانون آیین دادرسی مدنی (استماع گواهی گواهان)",
+          "ماده ۹۶ قانون آیین دادرسی مدنی (ارائه اصول اسناد)"
+        ],
+        "verdictOutcome": "تعیین وقت رسیدگی حضوری برای ۱۴۰۵/۰۸/۰۶ ساعت ۱۲:۳۰ و منوط شدن صدور تامین خواسته به تودیع ۵۰۰ میلیون ریال خسارت احتمالی ظرف ۷ روز"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": " ابلاغیه اصفهان شعبه ۳۸.pdf",
+      "fileSize": 188160,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792875968626-khhae",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "روند کاری پرونده شعبه ۳۴ اصفهان پی سی کالا",
+      "category": "deed",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-8625",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "مرجع رسمی / پیوست پرونده",
+      "summary": "مدرک پیوست‌شده به پرونده («روند کاری پرونده شعبه ۳۴ اصفهان پی سی کالا») به عنوان ادله و مستندات اثباتی.",
+      "parties": {
+        "claimant": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+        "defendant": "میلاد لعل‌فامی و محمد علی لعل‌فامی",
+        "advocate": "وکیل پایه یک دادگستری با اختیارات تام"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "پیوست ادله پرونده و در جریان رسیدگی",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده مادر"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "روند کاری پرونده شعبه ۳۴ اصفهان پی سی کالا.pdf",
+      "fileSize": 86017,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876004800-g6ksc",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "ریاست محترم مرجع رسیدگی 081615",
+      "category": "inquiry",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "081615",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "شبکه بانکی / بانک عامل",
+      "summary": "رسید تراکنش و انتقال وجه بانکی («ریاست محترم مرجع رسیدگی 081615») ضبط‌شده در پرونده جهت اثبات واریزی‌ها یا تراکنش مالی.",
+      "parties": {
+        "claimant": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+        "defendant": "میلاد لعل‌فامی و محمد علی لعل‌فامی",
+        "advocate": "وکیل پایه یک دادگستری با اختیارات تام"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "تایید انتقال مالی و سند پرداخت",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده مادر"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "ریاست محترم مرجع رسیدگی_081615.pdf",
+      "fileSize": 72140,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876070670-ov4es",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "شکواییه کیفری اصفهان پی سی کالا",
+      "category": "order",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-0670",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "summary": "دادخواست یا شکواییه آغازین ثبت‌شده («شکواییه کیفری اصفهان پی سی کالا») متضمن خواسته یا عنوان بزه انتسابی.",
+      "parties": {
+        "claimant": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+        "defendant": "میلاد لعل‌فامی و محمد علی لعل‌فامی",
+        "advocate": "وکیل پایه یک دادگستری با اختیارات تام"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "ثبت در مرجع قضایی رسیدگی‌کننده",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده مادر"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "شکواییه کیفری اصفهان پی سی کالا.pdf",
+      "fileSize": 109094,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876135987-6wwis",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "لایحه شکایت حقوقی مشهد اصفهان پی‌سی کالا",
+      "category": "minutes",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-5987",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "شعبه رسیدگی‌کننده دادگاه / دادسرا",
+      "summary": "لایحه دفاعیه و اظهارات حقوقی تنظیمی («لایحه شکایت حقوقی مشهد اصفهان پی‌سی کالا») حاوی دفاعیات ماهوی و استناد به موازین قانونی.",
+      "parties": {
+        "claimant": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+        "defendant": "میلاد لعل‌فامی و محمد علی لعل‌فامی",
+        "advocate": "وکیل پایه یک دادگستری با اختیارات تام"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "ارسال به شعبه رسیدگی‌کننده پرونده",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده مادر"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "لایحه شکایت حقوقی مشهد-اصفهان پی‌سی کالا.pdf",
+      "fileSize": 59601,
+      "isStarred": true
+    },
+    {
+      "id": "doc-1792876201341-2ztax",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "140520990000960162 1",
+      "category": "deed",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "140520990000960162",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "مرجع رسمی / پیوست پرونده",
+      "summary": "مدرک پیوست‌شده به پرونده («140520990000960162 1») به عنوان ادله و مستندات اثباتی.",
+      "parties": {
+        "claimant": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+        "defendant": "میلاد لعل‌فامی و محمد علی لعل‌فامی",
+        "advocate": "وکیل پایه یک دادگستری با اختیارات تام"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "پیوست ادله پرونده و در جریان رسیدگی",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده مادر"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "140520990000960162_1.pdf",
+      "fileSize": 86907,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876268244-pn93k",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "ابلاغیه اعسار لعل‌فامی",
+      "category": "deed",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-8244",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "مرجع رسمی / پیوست پرونده",
+      "summary": "مدرک پیوست‌شده به پرونده («ابلاغیه اعسار لعل‌فامی») به عنوان ادله و مستندات اثباتی.",
+      "parties": {
+        "claimant": "علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام",
+        "defendant": "میلاد لعل‌فامی و محمد علی لعل‌فامی",
+        "advocate": "وکیل پایه یک دادگستری با اختیارات تام"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "پیوست ادله پرونده و در جریان رسیدگی",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده مادر"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "ابلاغیه اعسار لعل‌فامی.pdf",
+      "fileSize": 181904,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876327522-bmxys",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد  پی سی کالا",
+      "category": "order",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-7065",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "summary": "دادخواست یا شکواییه آغازین ثبت‌شده («دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد  پی سی کالا») متضمن خواسته یا عنوان بزه انتسابی.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "ارجاع به شعبه بازپرسی/دادگاه عمومی",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد- پی سی کالا.pdf",
+      "fileSize": 165662,
+      "isStarred": true
+    },
+    {
+      "id": "doc-1792876329785-sc8f9",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد",
+      "category": "order",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-9874",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "summary": "دادخواست یا شکواییه آغازین ثبت‌شده («دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد») متضمن خواسته یا عنوان بزه انتسابی.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "ارجاع به شعبه بازپرسی/دادگاه عمومی",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد.pdf",
+      "fileSize": 162872,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876333666-ijdzd",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "دادنامه عدم صلاحیت شعبه ۱ خمینی مشهد پی سی کالا",
+      "category": "verdict",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-3439",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "شعبه دادگاه عمومی حقوقی / کیفری",
+      "summary": "دادنامه یا تصمیم قضایی («دادنامه عدم صلاحیت شعبه ۱ خمینی مشهد پی سی کالا») اصداری در خصوص ادعای مطروحه.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "رأی اصداری شعبه رسیدگی‌کننده",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "دادنامه عدم صلاحیت شعبه ۱ خمینی مشهد پی سی کالا.pdf",
+      "fileSize": 180265,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876336986-z7hvn",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "دادنامه عدم صلاحیت کیفری اصفهان ارجاع به کاشان",
+      "category": "verdict",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-7015",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "شعبه دادگاه عمومی حقوقی / کیفری",
+      "summary": "دادنامه یا تصمیم قضایی («دادنامه عدم صلاحیت کیفری اصفهان ارجاع به کاشان») اصداری در خصوص ادعای مطروحه.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "رأی اصداری شعبه رسیدگی‌کننده",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "دادنامه عدم صلاحیت کیفری اصفهان ارجاع به کاشان.pdf",
+      "fileSize": 192162,
+      "isStarred": true
+    },
+    {
+      "id": "doc-1792876339860-b0cwk",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "دستور قضایی به پلیس فتا پی سی کالا",
+      "category": "expert_report",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-9737",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "کانون کارشناسان / مرجع انتظامی",
+      "summary": "نظریه کارشناسی یا گزارش مرجع انتظامی («دستور قضایی به پلیس فتا پی سی کالا») متضمن معاینه محل و اظهارنظر فنی.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "دلیل کارشناسی و گزارش ضابطین دادگستری",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "دستور قضایی به پلیس فتا پی سی کالا.pdf",
+      "fileSize": 104474,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876345709-3unnn",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "شکایت پی سی کالا به پلیس فتا اصفهان(1)",
+      "category": "order",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-5826",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "summary": "دادخواست یا شکواییه آغازین ثبت‌شده («شکایت پی سی کالا به پلیس فتا اصفهان(1)») متضمن خواسته یا عنوان بزه انتسابی.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "ارجاع به شعبه بازپرسی/دادگاه عمومی",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "شکایت پی سی کالا به پلیس فتا اصفهان(1).pdf",
+      "fileSize": 842849,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876348930-vcs0m",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "عدم صلاحیت شکایت حقوقی مشهد شعبه ۱",
+      "category": "order",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-9046",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "summary": "دادخواست یا شکواییه آغازین ثبت‌شده («عدم صلاحیت شکایت حقوقی مشهد شعبه ۱») متضمن خواسته یا عنوان بزه انتسابی.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "ارجاع به شعبه بازپرسی/دادگاه عمومی",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "عدم صلاحیت شکایت حقوقی مشهد شعبه ۱.pdf",
+      "fileSize": 180265,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876353305-m9awu",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "دادنامه شعبه ۱۱۱ کیفری دو اصفهان (شهید مطهری) چندی از شاکیان",
+      "category": "verdict",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-3403",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "شعبه دادگاه عمومی حقوقی / کیفری",
+      "summary": "دادنامه یا تصمیم قضایی («دادنامه شعبه ۱۱۱ کیفری دو اصفهان (شهید مطهری) چندی از شاکیان») اصداری در خصوص ادعای مطروحه.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "رأی اصداری شعبه رسیدگی‌کننده",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "دادنامه شعبه ۱۱۱ کیفری دو اصفهان (شهید مطهری) چندی از شاکیان.pdf",
+      "fileSize": 500276,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876356439-idsu8",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "دادنامه شعبه ۱۱۷۰ کیفری دو تهران قدس ( فائزه سعیدی )",
+      "category": "verdict",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "مدرک-6532",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "شعبه دادگاه عمومی حقوقی / کیفری",
+      "summary": "دادنامه یا تصمیم قضایی («دادنامه شعبه ۱۱۷۰ کیفری دو تهران قدس ( فائزه سعیدی )») اصداری در خصوص ادعای مطروحه.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "رأی اصداری شعبه رسیدگی‌کننده",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "-دادنامه شعبه ۱۱۷۰ کیفری دو تهران قدس ( فائزه سعیدی ).pdf",
+      "fileSize": 338571,
+      "isStarred": false
+    },
+    {
+      "id": "doc-1792876358839-1okyq",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "title": "شاکیان 085417",
+      "category": "deed",
+      "caseDomain": "general",
+      "suggestedDossierTitle": "پی سی کالا شکایت",
+      "documentNumber": "085417",
+      "issueDate": "۱۴۰۳/۰۶/۰۱",
+      "authority": "مرجع رسمی / پیوست پرونده",
+      "summary": "مدرک پیوست‌شده به پرونده به عنوان ادله و مستندات اثباتی.",
+      "parties": {
+        "claimant": "خواهان / موکل پرونده",
+        "defendant": "خوانده / طرف دعوا",
+        "advocate": "وکیل پایه یک دادگستری"
+      },
+      "riskLevel": "medium",
+      "isForgedOrConflicting": false,
+      "extractedEntities": {
+        "verdictOutcome": "پیوست ادله پرونده و در جریان رسیدگی",
+        "forgeryIndicators": [],
+        "relevantLegalArticles": [
+          "قوانین آیین دادرسی، مدنی و تجارت"
+        ],
+        "nextActionNeeded": "بررسی در راستای استراتژی دفاعی پرونده و ارائه در دادگاه"
+      },
+      "isPendingRoot": false,
+      "isPreloaded": false,
+      "fileName": "شاکیان_085417.pdf",
+      "fileSize": 119974,
+      "isStarred": false
+    }
+  ],
+  "disputes": [
+    {
+      "id": "disp-1792685587415",
+      "pelakId": "pelak-auto-1792685587415",
+      "pelakCode": "نامشخص",
+      "title": "پرونده تعارض/جعل: لایحه دفاعیه در پاسخ به دادخواست اعتراض ثالث",
+      "disputeType": "فروش مال غیر",
+      "severity": "high",
+      "involvedParties": [
+        "جلال زینل‌نیا طوسی (معترض ثالث)",
+        "زهرا خسروجردی، غلامعلی محجوبی (متوفی)، ایرج ارباب امین (متوفی)"
+      ],
+      "conflictingDocs": [
+        "نامشخص (مربوط به پرونده‌های مرتبط در شعب ۶۰۴، ۶۰۳ و ۱۲۴ کیفری دو)"
+      ],
+      "courtBranch": "شعبه ۸ دادگاه تجدید نظر استان خراسان رضوی",
+      "caseNumber": "نامشخص (مربوط به پرونده‌های مرتبط در شعب ۶۰۴، ۶۰۳ و ۱۲۴ کیفری دو)",
+      "legalStatus": "رسیدگی در دادگاه تجدیدنظر",
+      "strategyNote": "اعمال ماده ۹۶ قانون آیین دادرسی مدنی و تقاضای ابطال یا خروج اسناد از عداد دلایل در صورت عدم ارائه اصول، و قرار رد یا توقف دادرسی به جهت لزوم طرف دعوا قراردادن وراث متوفیان"
+    }
+  ],
+  "timeline": [
+    {
+      "id": "tl-1792774516249",
+      "pelakId": "pelak-auto-1792685587415",
+      "pelakCode": "نامشخص",
+      "date": "۱۴۰۲/۰۸/۱۵",
+      "title": "سند رسمی و گواهی ثبتی مضبوط در پرونده",
+      "type": "inquiry",
+      "authority": "اداره ثبت اسناد و املاک دماوند",
+      "description": "نام فایل: لایحه شکایت حقوقی مشهد-اصفهان پی‌سی کالا.pdf\n...",
+      "docId": "doc-1792774516248-118ua",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792777398185",
+      "pelakId": "pelak-auto-1792685587415",
+      "pelakCode": "نامشخص",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "سند: فاکتور (۸۵۰۴۵)",
+      "type": "court",
+      "authority": "مرجع قضایی / رسمی صادرکننده",
+      "description": "بررسی موشکافانه سند «فاکتور (۸۵۰۴۵).pdf» و الحاق به کارتابل وکیل با اختیارات تام.",
+      "docId": "doc-1792777398185-s36gq",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867005516",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "مرجع قضایی / رسمی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867005516-4rtje",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867007768",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "مرجع قضایی / رسمی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867007767-z5mw1",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867009960",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "دادگاه عمومی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867009960-owmmx",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867012732",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "دادگاه عمومی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867012731-s39l9",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867015101",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "مرجع قضایی / رسمی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867015101-nvkiv",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867019149",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "مرجع قضایی / رسمی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867019149-ll7fo",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867021662",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "دادگاه عمومی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867021662-0ya6u",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867024176",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "دادگاه عمومی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867024176-dp9m7",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867026676",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "دادگاه عمومی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867026676-yq3gc",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867029245",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "مرجع قضایی / رسمی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867029245-mt55i",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792867031648",
+      "pelakId": "dossier-criminal-1792867002186",
+      "pelakCode": "کلاسه-2186",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "پرونده انتسابی وکیل: شکایت علیه میلاد و ",
+      "type": "court",
+      "authority": "مرجع قضایی / رسمی",
+      "description": "پرونده انتسابی وکیل: شکایت علیه میلاد و محمدعلی لعل‌فامی (شرکت پی‌سی‌کالا زیر مجموعه گروه مهندسی لعل‌فام) (کلاسه-2186)\nحوزه: criminal\nشاکی/موکل: علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\nطرف مقابل: میلاد لعل ‌فامی و محمدعلی لعل‌فامی\nنام فایل:",
+      "docId": "doc-1792867031648-cz8aa",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792875786304",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "1404/10/14",
+      "title": "تاییدیه پرداخت سپ",
+      "type": "inquiry",
+      "authority": "شرکت پرداخت الکترونیک سامان کیش (سپ)",
+      "description": "گواهی و تاییدیه رسمی شرکت پرداخت الکترونیک سامان کیش (سپ) خطاب به فروشگاه پی سی کالا، دایر بر انجام موفق تراکنش خرید اینترنتی با کارت بانکی شماره ۶۱۰۴۳۳۷۴۵۶۸۱۳۵۷۳ در تاریخ ۱۴۰۴/۱۰/۰۶ ساعت ۱۱:۵۸ به مبلغ ۱،۲۸۷،۴۰۰،۰۰۰ ریال (یکصد و بیست و هشت میلیون و هفتصد و چهل هزار تومان) با شماره مرجع ۲۲۴۱۹۰۱۵۶۸۷۷، شناسه خرید ۱۱۰۷۴۱ و شماره پایانه ۱۳۷۹۳۱۳۰.",
+      "docId": "doc-1792875786303-4uax6",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792875812196",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "1402/10/06",
+      "title": "رسید پرداخت",
+      "type": "inquiry",
+      "authority": "شبکه پرداخت الکترونیک شاپرک / درگاه پرداخت فروشگاه پی سی کالا",
+      "description": "تأییدیه تراکنش موفق پرداخت الکترونیک اینترنتی به مبلغ ۱,۲۸۶,۵۰۰,۰۰۰ ریال (معادل ۱۲۸ میلیون و ۶۵۰ هزار تومان) در وجه «فروشگاه پی سی کالا» در تاریخ ۱۴۰۲/۱۰/۰۶ ساعت ۱۱:۵۶. تراکنش با شماره کارت مبدأ منتهی به ۹۵۹۸ (بانک ملت)، شماره مرجع (RRN) ۲۲۴۱۹۰۱۴۰۰۶۱، شماره پایانه ۱۳۷۹۳۱۳۰، شناسه خرید ۱۱۰۷۴۲ و رسید دیجیتالی ثبت شده و وضعیت آن تأیید شده است که به عنوان دلیل اثباتی پرداخت ثمن و عدم ایفای تعهد در پرونده قابل استناد است.",
+      "docId": "doc-1792875812196-sy7e8",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792875835585",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "1404/10/06",
+      "title": "فاکتور (۸۵۰۴۵)",
+      "type": "inquiry",
+      "authority": "فروشگاه اینترنتی پی سی کالا (PCKala)",
+      "description": "فاکتور الکترونیکی سفارش شماره ۸۵۰۴۵ متعلق به خریدار علیرضا مهدی‌پور شادکام از فروشگاه پی سی کالا به ارزش ۱۲۸,۷۴۰,۰۰۰ تومان؛ بابت یک دستگاه لپ‌تاپ لنوو Lenovo LOQ-AA Core i7 (با مشخصات رم ۲۴ گیگابایت، حافظه ۵۱۲ گیگابایت SSD و گرافیک RTX 5060) پرداختی از طریق درگاه 'پی سی کالا پی' با شناسه تراکنش ۱۱۰۷۴۱ مورخ ۱۴۰۴/۱۰/۰۶.",
+      "docId": "doc-1792875835585-3avoh",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792875901120",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "1405/07/22",
+      "title": "ابلاغیه اصفهان شعبه ۳۸",
+      "type": "inquiry",
+      "authority": "شعبه ۳۸ دادگاه عمومی حقوقی اصفهان (مجتمع قضایی شهید سردار محمدرضا زاهدی)",
+      "description": "ابلاغ اخطاریه و احضاریه جهت حضور در جلسه رسیدگی مورخ ۱۴۰۵/۰۸/۰۶ ساعت ۱۲:۳۰ شعبه ۳۸ حقوقی اصفهان به مخاطب (علیرضا مهدی پورشادکام). دستورات دادگاه شامل: ۱- الزام به معرفی و حضور گواهان دارای ثنا و امضای الکترونیک جهت استماع شهادت شهود؛ ۲- ارائه اصول اسناد و مدارک؛ ۳- اخذ توضیح پیرامون درآمد و معیشت خواهان؛ ۴- تعیین مهلت ۷ روزه برای تودیع مبلغ ۵۰۰،۰۰۰،۰۰۰ ریال خسارت احتمالی جهت صدور قرار تامین خواسته؛ ۵- ابطال وقت رسیدگی قبلی مورخ ۱۴۰۵/۱۰/۱۴.",
+      "docId": "doc-1792875901120-4tnw9",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792875968626",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "روند کاری پرونده شعبه ۳۴ اصفهان پی سی کالا",
+      "type": "deed",
+      "authority": "مرجع رسمی / پیوست پرونده",
+      "description": "مدرک پیوست‌شده به پرونده («روند کاری پرونده شعبه ۳۴ اصفهان پی سی کالا») به عنوان ادله و مستندات اثباتی.",
+      "docId": "doc-1792875968626-khhae",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792876004800",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "ریاست محترم مرجع رسیدگی 081615",
+      "type": "inquiry",
+      "authority": "شبکه بانکی / بانک عامل",
+      "description": "رسید تراکنش و انتقال وجه بانکی («ریاست محترم مرجع رسیدگی 081615») ضبط‌شده در پرونده جهت اثبات واریزی‌ها یا تراکنش مالی.",
+      "docId": "doc-1792876004800-g6ksc",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792876070670",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "شکواییه کیفری اصفهان پی سی کالا",
+      "type": "inquiry",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "description": "دادخواست یا شکواییه آغازین ثبت‌شده («شکواییه کیفری اصفهان پی سی کالا») متضمن خواسته یا عنوان بزه انتسابی.",
+      "docId": "doc-1792876070670-ov4es",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792876135987",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "لایحه شکایت حقوقی مشهد اصفهان پی‌سی کالا",
+      "type": "inquiry",
+      "authority": "شعبه رسیدگی‌کننده دادگاه / دادسرا",
+      "description": "لایحه دفاعیه و اظهارات حقوقی تنظیمی («لایحه شکایت حقوقی مشهد اصفهان پی‌سی کالا») حاوی دفاعیات ماهوی و استناد به موازین قانونی.",
+      "docId": "doc-1792876135987-6wwis",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792876201342",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "140520990000960162 1",
+      "type": "deed",
+      "authority": "مرجع رسمی / پیوست پرونده",
+      "description": "مدرک پیوست‌شده به پرونده («140520990000960162 1») به عنوان ادله و مستندات اثباتی.",
+      "docId": "doc-1792876201341-2ztax",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792876268244",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "ابلاغیه اعسار لعل‌فامی",
+      "type": "deed",
+      "authority": "مرجع رسمی / پیوست پرونده",
+      "description": "مدرک پیوست‌شده به پرونده («ابلاغیه اعسار لعل‌فامی») به عنوان ادله و مستندات اثباتی.",
+      "docId": "doc-1792876268244-pn93k",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792876327522",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد  پی سی کالا",
+      "type": "inquiry",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "description": "دادخواست یا شکواییه آغازین ثبت‌شده («دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد  پی سی کالا») متضمن خواسته یا عنوان بزه انتسابی.",
+      "docId": "doc-1792876327522-bmxys",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792876329785",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد",
+      "type": "inquiry",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "description": "دادخواست یا شکواییه آغازین ثبت‌شده («دادنامه اعسار شکایت حقوقی شعبه ۱ مشهد») متضمن خواسته یا عنوان بزه انتسابی.",
+      "docId": "doc-1792876329785-sc8f9",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792876333666",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "دادنامه عدم صلاحیت شعبه ۱ خمینی مشهد پی سی کالا",
+      "type": "court",
+      "authority": "شعبه دادگاه عمومی حقوقی / کیفری",
+      "description": "دادنامه یا تصمیم قضایی («دادنامه عدم صلاحیت شعبه ۱ خمینی مشهد پی سی کالا») اصداری در خصوص ادعای مطروحه.",
+      "docId": "doc-1792876333666-ijdzd",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792876336986",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "دادنامه عدم صلاحیت کیفری اصفهان ارجاع به کاشان",
+      "type": "court",
+      "authority": "شعبه دادگاه عمومی حقوقی / کیفری",
+      "description": "دادنامه یا تصمیم قضایی («دادنامه عدم صلاحیت کیفری اصفهان ارجاع به کاشان») اصداری در خصوص ادعای مطروحه.",
+      "docId": "doc-1792876336986-z7hvn",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792876339860",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "دستور قضایی به پلیس فتا پی سی کالا",
+      "type": "inquiry",
+      "authority": "کانون کارشناسان / مرجع انتظامی",
+      "description": "نظریه کارشناسی یا گزارش مرجع انتظامی («دستور قضایی به پلیس فتا پی سی کالا») متضمن معاینه محل و اظهارنظر فنی.",
+      "docId": "doc-1792876339860-b0cwk",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792876345709",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "شکایت پی سی کالا به پلیس فتا اصفهان(1)",
+      "type": "inquiry",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "description": "دادخواست یا شکواییه آغازین ثبت‌شده («شکایت پی سی کالا به پلیس فتا اصفهان(1)») متضمن خواسته یا عنوان بزه انتسابی.",
+      "docId": "doc-1792876345709-3unnn",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792876348930",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "عدم صلاحیت شکایت حقوقی مشهد شعبه ۱",
+      "type": "inquiry",
+      "authority": "دفتر خدمات الکترونیک قضایی / دادسرا",
+      "description": "دادخواست یا شکواییه آغازین ثبت‌شده («عدم صلاحیت شکایت حقوقی مشهد شعبه ۱») متضمن خواسته یا عنوان بزه انتسابی.",
+      "docId": "doc-1792876348930-vcs0m",
+      "isKeyMilestone": false
+    },
+    {
+      "id": "tl-1792876353305",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "دادنامه شعبه ۱۱۱ کیفری دو اصفهان (شهید مطهری) چندی از شاکیان",
+      "type": "court",
+      "authority": "شعبه دادگاه عمومی حقوقی / کیفری",
+      "description": "دادنامه یا تصمیم قضایی («دادنامه شعبه ۱۱۱ کیفری دو اصفهان (شهید مطهری) چندی از شاکیان») اصداری در خصوص ادعای مطروحه.",
+      "docId": "doc-1792876353305-m9awu",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792876356439",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "دادنامه شعبه ۱۱۷۰ کیفری دو تهران قدس ( فائزه سعیدی )",
+      "type": "court",
+      "authority": "شعبه دادگاه عمومی حقوقی / کیفری",
+      "description": "دادنامه یا تصمیم قضایی («دادنامه شعبه ۱۱۷۰ کیفری دو تهران قدس ( فائزه سعیدی )») اصداری در خصوص ادعای مطروحه.",
+      "docId": "doc-1792876356439-idsu8",
+      "isKeyMilestone": true
+    },
+    {
+      "id": "tl-1792876358840",
+      "pelakId": "dossier-general-1792875771816",
+      "pelakCode": "کلاسه-1816",
+      "date": "۱۴۰۳/۰۶/۰۱",
+      "title": "شاکیان 085417",
+      "type": "deed",
+      "authority": "مرجع رسمی / پیوست پرونده",
+      "description": "مدرک پیوست‌شده به پرونده به عنوان ادله و مستندات اثباتی.",
+      "docId": "doc-1792876358839-1okyq",
+      "isKeyMilestone": true
+    }
+  ],
+  "chatSessions": [
+    {
+      "id": "session-1792883500137-s2bzh",
+      "title": "مشاوره پرونده جدید",
+      "pelakId": "all",
+      "createdAt": 1792883500137,
+      "updatedAt": 1792883533129,
+      "draftInput": "",
+      "messages": [
+        {
+          "id": "welcome",
+          "sender": "agent",
+          "timestamp": "هم‌اکنون",
+          "text": "سلام و احترام همکار گرامی؛ من مستشار و دستیار ارشد حقوقی شما هستم.\nتمامی پرونده‌ها، اسناد و مدارک مضبوط در کارتابل پیش روی من است و بر موازین قانون مدنی، تجارت، صدور چک، مجازات اسلامی، ثبت اسناد، آیین دادرسی و رویه قضایی مسلط هستم.\nمی‌توانید برای هر پرونده یا سند یک سربرگ گفتگوی مجزا ایجاد فرمایید. آماده‌ام به پرسش‌های حقوقی و کیفری شما به صورت تخصصی و منطبق با اسناد بارگذاری‌شده پاسخ دهم."
+        },
+        {
+          "id": "msg-1792883530925",
+          "sender": "user",
+          "timestamp": "هم‌اکنون",
+          "text": "در مورد سند «دادنامه عدم صلاحیت کیفری اصفهان ارجاع به کاشان» با شماره «مدرک-7015» مربوط به پرونده «کلاسه-1816»، مفاد حقوقی، استناد به احکام و اقدام بعدی وکیل را تشریح کن.",
+          "referencedPelak": "کلاسه-1816"
+        },
+        {
+          "id": "agent-1792883533128",
+          "sender": "agent",
+          "timestamp": "هم‌اکنون",
+          "text": "### ⚖️ ارزیابی کیفری و تحلیل ارکان جرم در پرونده «پی سی کالا شکایت»\n**شاکی/موکل:** علیرضا مهدی‌پور شادکام و محمدحسین مهدی‌پور شادکام\n\n#### ۱. موازین کیفری حاکم و تطبیق ارکان بزه\n\n\n\n\n۳. **قواعد صلاحیت و شیوه طرح شکایت:**\n   - دادسرای عمومی و انقلاب محل وقوع جرم (محل افتتاح حساب مقصد یا محل تسلیم مال) صالح به رسیدگی است (ماد ۳۱۰ قانون آیین دادرسی کیفری).\n\n#### ۲. ارزیابی ادله و امارات موجود در کارتابل\nمدارک مستقیم منطبق با پرسش شما در پرونده «پی سی کالا شکایت»:\n• **شاکیان 085417** (شماره: `۰۸۵۴۱۷` - تاریخ: ۱۴۰۳/۰۶/۰۱):\n  مدرک پیوست‌شده به پرونده به عنوان ادله و مستندات اثباتی.\n• **دادنامه شعبه ۱۱۷۰ کیفری دو تهران قدس ( فائزه سعیدی )** (شماره: `مدرک-۶۵۳۲` - تاریخ: ۱۴۰۳/۰۶/۰۱):\n  دادنامه یا تصمیم قضایی («دادنامه شعبه ۱۱۷۰ کیفری دو تهران قدس ( فائزه سعیدی )») اصداری در خصوص ادعای مطروحه.\n• **دادنامه شعبه ۱۱۱ کیفری دو اصفهان (شهید مطهری) چندی از شاکیان** (شماره: `مدرک-۳۴۰۳` - تاریخ: ۱۴۰۳/۰۶/۰۱):\n  دادنامه یا تصمیم قضایی («دادنامه شعبه ۱۱۱ کیفری دو اصفهان (شهید مطهری) چندی از شاکیان») اصداری در خصوص ادعای مطروحه.\n\n#### ۳. نقشه راه اقدامات اولویت‌دار شاکی و وکیل\n۱. **ردیابی مالی فوری (مسدودی وجوه):** در ابتدای شکواییه از بازپرس محترم تقاضا شود فوراً با ارسال دستور قضایی به پلیس فتا یا بانک مرکزی، کلیه وجوه انتقالی در حساب‌های متهم و حساب‌های متصل ردیابی و مسدود گردد.\n۲. **جلوگیری از فرار متهم:** تقاضای صدور قرار ممنوع‌الخروجی متهم به استناد ماده ۱۸۸ قانون آیین دادرسی کیفری تا پیش از حضور در شعبه.\n۳. **تامین خسارت (قرارهای تامین خواسته کیفری):** تقدیم دادخواست تامین خواسته کیفری بر مبنای ماده ۱۰۷ قانون آیین دادرسی کیفری جهت توقیف اموال منقول و غیرمنقول متهم بدون پرداخت خسارت احتمالی.",
+          "referencedPelak": "کلاسه-1816"
+        }
+      ]
+    }
+  ]
+}
