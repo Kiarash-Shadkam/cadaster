@@ -1,8 +1,8 @@
-import { PelakNode, LegalDocument, DisputeAlert, TimelineItem, ChatSession } from '../types/cadastre';
-import { INITIAL_PELAKS, INITIAL_DOCUMENTS, INITIAL_DISPUTES, INITIAL_TIMELINE, INITIAL_CHAT_SESSIONS } from '../data/cadastreData';
+import { PelakNode, LegalDocument, DisputeAlert, TimelineItem, ChatSession, LegalDeadline, FeeRecord } from '../types/cadastre';
+import { INITIAL_PELAKS, INITIAL_DOCUMENTS, INITIAL_DISPUTES, INITIAL_TIMELINE } from '../data/cadastreData';
 
 const DB_NAME = 'CadasterAttorneyVaultDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export const STORES = {
   DOCUMENTS: 'documents',
@@ -11,6 +11,8 @@ export const STORES = {
   TIMELINE: 'timeline',
   CHAT_SESSIONS: 'chat_sessions',
   SETTINGS: 'settings',
+  DEADLINES: 'deadlines',
+  FEE_RECORDS: 'fee_records',
 } as const;
 
 let dbInstance: IDBDatabase | null = null;
@@ -74,6 +76,19 @@ export function getDb(): Promise<IDBDatabase> {
       // 6. Key-Value Settings Store
       if (!db.objectStoreNames.contains(STORES.SETTINGS)) {
         db.createObjectStore(STORES.SETTINGS, { keyPath: 'key' });
+      }
+
+      // 7. Court Deadlines Store
+      if (!db.objectStoreNames.contains(STORES.DEADLINES)) {
+        const deadlineStore = db.createObjectStore(STORES.DEADLINES, { keyPath: 'id' });
+        deadlineStore.createIndex('pelakId', 'pelakId', { unique: false });
+        deadlineStore.createIndex('calculatedDueDate', 'calculatedDueDate', { unique: false });
+      }
+
+      // 8. Fee & Article 103 Accounting Store
+      if (!db.objectStoreNames.contains(STORES.FEE_RECORDS)) {
+        const feeStore = db.createObjectStore(STORES.FEE_RECORDS, { keyPath: 'id' });
+        feeStore.createIndex('pelakId', 'pelakId', { unique: false });
       }
     };
 
@@ -206,6 +221,30 @@ export async function dbLoadChatSessions(): Promise<ChatSession[]> {
 }
 
 // -----------------------------------------------------------------------------
+// Legal Deadlines Persistence
+// -----------------------------------------------------------------------------
+
+export async function dbSaveDeadlines(deadlines: LegalDeadline[]): Promise<void> {
+  await overwriteStore(STORES.DEADLINES, deadlines);
+}
+
+export async function dbLoadDeadlines(): Promise<LegalDeadline[]> {
+  return await readAllFromStore<LegalDeadline>(STORES.DEADLINES);
+}
+
+// -----------------------------------------------------------------------------
+// Fee & Article 103 Accounting Records Persistence
+// -----------------------------------------------------------------------------
+
+export async function dbSaveFeeRecords(fees: FeeRecord[]): Promise<void> {
+  await overwriteStore(STORES.FEE_RECORDS, fees);
+}
+
+export async function dbLoadFeeRecords(): Promise<FeeRecord[]> {
+  return await readAllFromStore<FeeRecord>(STORES.FEE_RECORDS);
+}
+
+// -----------------------------------------------------------------------------
 // Full Database Clear (for reset data feature)
 // -----------------------------------------------------------------------------
 
@@ -219,6 +258,8 @@ export async function dbClearAll(): Promise<void> {
       STORES.TIMELINE,
       STORES.CHAT_SESSIONS,
       STORES.SETTINGS,
+      STORES.DEADLINES,
+      STORES.FEE_RECORDS,
     ];
     return new Promise((resolve, reject) => {
       const tx = db.transaction(stores, 'readwrite');
@@ -243,6 +284,8 @@ export interface InitialDossierData {
   disputes: DisputeAlert[];
   timeline: TimelineItem[];
   chatSessions?: ChatSession[];
+  deadlines?: LegalDeadline[];
+  feeRecords?: FeeRecord[];
 }
 
 /**
@@ -254,12 +297,14 @@ export async function initializeDatabase(): Promise<InitialDossierData> {
   try {
     await getDb();
 
-    let [dbPelaks, dbDocs, dbDisputes, dbTimeline, dbChats] = await Promise.all([
+    let [dbPelaks, dbDocs, dbDisputes, dbTimeline, dbChats, dbDeadlines, dbFees] = await Promise.all([
       dbLoadPelaks(),
       dbLoadDocuments(),
       dbLoadDisputes(),
       dbLoadTimeline(),
       dbLoadChatSessions(),
+      dbLoadDeadlines(),
+      dbLoadFeeRecords(),
     ]);
 
     // Check if IndexedDB already has populated documents or pelaks
@@ -303,9 +348,25 @@ export async function initializeDatabase(): Promise<InitialDossierData> {
       // 5. Chat Sessions
       try {
         const savedChats = localStorage.getItem('cadaster_legal_chat_sessions_v2');
-        dbChats = savedChats ? JSON.parse(savedChats) : INITIAL_CHAT_SESSIONS;
+        dbChats = savedChats ? JSON.parse(savedChats) : [];
       } catch {
-        dbChats = INITIAL_CHAT_SESSIONS;
+        dbChats = [];
+      }
+
+      // 6. Deadlines
+      try {
+        const savedDeadlines = localStorage.getItem('cadaster_legal_deadlines');
+        dbDeadlines = savedDeadlines ? JSON.parse(savedDeadlines) : [];
+      } catch {
+        dbDeadlines = [];
+      }
+
+      // 7. Fee Records
+      try {
+        const savedFees = localStorage.getItem('cadaster_legal_fee_records');
+        dbFees = savedFees ? JSON.parse(savedFees) : [];
+      } catch {
+        dbFees = [];
       }
 
       // Write everything to IndexedDB right away
@@ -315,6 +376,8 @@ export async function initializeDatabase(): Promise<InitialDossierData> {
         dbSaveDisputes(dbDisputes),
         dbSaveTimeline(dbTimeline),
         dbSaveChatSessions(dbChats),
+        dbSaveDeadlines(dbDeadlines),
+        dbSaveFeeRecords(dbFees),
       ]);
       console.log('Migration to IndexedDB completed successfully.');
     }
@@ -325,6 +388,8 @@ export async function initializeDatabase(): Promise<InitialDossierData> {
       disputes: dbDisputes,
       timeline: dbTimeline,
       chatSessions: dbChats,
+      deadlines: dbDeadlines,
+      feeRecords: dbFees,
     };
   } catch (err) {
     console.error('IndexedDB initialization failed, falling back to localStorage/initial:', err);
@@ -333,7 +398,8 @@ export async function initializeDatabase(): Promise<InitialDossierData> {
       documents: INITIAL_DOCUMENTS,
       disputes: INITIAL_DISPUTES,
       timeline: INITIAL_TIMELINE,
-      chatSessions: INITIAL_CHAT_SESSIONS,
+      deadlines: [],
+      feeRecords: [],
     };
   }
 }

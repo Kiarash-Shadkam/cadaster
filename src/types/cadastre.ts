@@ -19,7 +19,8 @@ export type PelakStatus =
   | 'disputed'     // متنازع‌فیه و دارای دعوای حقوقی
   | 'arrested'     // توقیفی / دستور موقت / تأمین خواسته
   | 'pending'      // در جریان عملیات ثبتی یا تحدید حدود
-  | 'forged';      // دارای سند مجعول / فروش مال غیر
+  | 'forged'       // دارای سند مجعول / فروش مال غیر
+  | 'closed';      // مختومه و بایگانی‌شده
 
 export type DocumentCategory =
   | 'deed'              // سند مالکیت رسمی (تک‌برگی / دفترچه‌ای)
@@ -204,6 +205,78 @@ export interface ChatSession {
   messages: ChatMessage[];
 }
 
+export interface LegalDeadline {
+  id: string;
+  pelakId: string;
+  pelakCode: string;
+  title: string;
+  deadlineType:
+    | 'appeal_20d'           // تجدیدنظرخواهی (۲۰ روز)
+    | 'supreme_appeal_20d'   // فرجام‌خواهی (۲۰ روز)
+    | 'default_judgment_20d' // واخواهی (۲۰ روز)
+    | 'expert_objection_7d'  // اعتراض به نظریه کارشناسی (۷ روز)
+    | 'defect_rectification_10d' // اخطار رفع نقص (۱۰ روز)
+    | 'court_hearing'        // جلسه دادرسی
+    | 'custom';              // سایر مواعد قانونی
+  sanaNotificationDate: string; // تاریخ ابلاغ در ثنا (مثلاً ۱۴۰۳/۰۸/۱۰)
+  calculatedDueDate: string;   // سررسید انقضا با احتساب روز ابلاغ و اقدام
+  courtBranch: string;         // شعبه دادگاه
+  caseNumber: string;          // شماره پرونده / کلاسه
+  notes?: string;
+  isCompleted: boolean;
+  createdAt: string;
+}
+
+export interface FeePayment {
+  id: string;
+  date: string;
+  amountTomans: number;
+  description: string;
+  method: 'کارت‌به‌کارت' | 'شبا/پایا' | 'چک' | 'نقدی' | 'پوز دفتر';
+}
+
+export interface FeeRecord {
+  id: string;
+  pelakId: string;
+  pelakCode: string;
+  clientName: string;
+  caseSubject: string;
+  claimAmountTomans: number;      // بهای خواسته به تومان
+  agreedFeeTomans: number;        // حق‌الوکاله توافقی کل به تومان
+  stage: 'badvi' | 'tajdid' | 'farjam' | 'ejra' | 'all_inclusive'; // مرحله رسیدگی
+  taxStampDutyTomans: number;     // تمبر مالیاتی ماده ۱۰۳ ق.م.م (۵٪)
+  supportFundTomans: number;      // سهم صندوق حمایت وکلا (۲.۵٪)
+  barShareTomans: number;         // سهم کانون وکلا (۱٪)
+  payments: FeePayment[];
+  notes?: string;
+  createdAt: string;
+}
+
+export interface LegalDraftTemplate {
+  id: string;
+  title: string;
+  category: 'petition' | 'bill' | 'injunction' | 'objection' | 'declaration';
+  applicableDomains?: CaseDomain[]; // موضوعات پرونده منطبق
+  isLandSpecific?: boolean;          // آیا مختص دعاوی ملکی، ثبتی و اراضی است؟
+  isGeneral?: boolean;               // آیا قالب عمومی و در کلیه پرونده‌ها قابل استفاده است؟
+  description: string;
+  legalBasis: string[]; // مواد قانونی استنادی
+  templateContent: string;
+}
+
+export interface ConflictMatch {
+  pelakId: string;
+  pelakCode: string;
+  pelakTitle: string;
+  matchedName: string;
+  roleInCase: string; // خواهان / خوانده / متهم / مالک رسمی / خریدار
+  caseDomain?: CaseDomain;
+  status: PelakStatus;
+  documentTitle?: string;
+  isAdverseParty: boolean; // آیا طرف متخاصم/خوانده/متهم بوده است؟
+  conflictWarning: string;
+}
+
 export interface VaultBackupData {
   version: string;
   exportedAt: string;
@@ -212,5 +285,7 @@ export interface VaultBackupData {
   disputes: DisputeAlert[];
   timeline: TimelineItem[];
   chatSessions?: ChatSession[];
+  deadlines?: LegalDeadline[];
+  feeRecords?: FeeRecord[];
 }
 

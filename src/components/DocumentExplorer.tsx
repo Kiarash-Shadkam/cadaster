@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   FileText,
   Search,
@@ -34,6 +34,12 @@ import {
   CheckCircle2,
   Settings,
   CopyCheck,
+  Eye,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  RotateCcw,
+  Download,
 } from 'lucide-react';
 import { LegalDocument, PelakNode, CaseDomain, DocumentCategory } from '../types/cadastre';
 import { toPersianDigits, getCategoryLabel, getDomainMeta } from '../utils/persian';
@@ -82,6 +88,72 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
   const [filterStarredOnly, setFilterStarredOnly] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeDocForModal, setActiveDocForModal] = useState<LegalDocument | null>(null);
+
+  // Quick View Modal State
+  const [quickViewDoc, setQuickViewDoc] = useState<LegalDocument | null>(null);
+  const [zoomScale, setZoomScale] = useState<number>(1);
+  const [rotationDeg, setRotationDeg] = useState<number>(0);
+
+  const handleOpenQuickView = (doc: LegalDocument) => {
+    setQuickViewDoc(doc);
+    setZoomScale(1);
+    setRotationDeg(0);
+  };
+
+  const handleZoomIn = () => {
+    setZoomScale((prev) => Math.min(4, Number((prev + 0.25).toFixed(2))));
+  };
+
+  const handleZoomOut = () => {
+    setZoomScale((prev) => Math.max(0.5, Number((prev - 0.25).toFixed(2))));
+  };
+
+  const handleRotateCw = () => {
+    setRotationDeg((prev) => (prev + 90) % 360);
+  };
+
+  const handleRotateCcw = () => {
+    setRotationDeg((prev) => (prev - 90 + 360) % 360);
+  };
+
+  const handleResetQuickView = () => {
+    setZoomScale(1);
+    setRotationDeg(0);
+  };
+
+  const handleDownloadQuickViewFile = () => {
+    if (!quickViewDoc?.scanImageUrl) return;
+    const a = document.createElement('a');
+    a.href = quickViewDoc.scanImageUrl;
+    const isPdf =
+      quickViewDoc.fileMimeType?.includes('pdf') ||
+      quickViewDoc.scanImageUrl.startsWith('data:application/pdf') ||
+      quickViewDoc.fileName?.toLowerCase().endsWith('.pdf');
+    const ext = isPdf ? '.pdf' : '.jpg';
+    a.download = quickViewDoc.fileName || `${quickViewDoc.title}${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  useEffect(() => {
+    if (!quickViewDoc) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setQuickViewDoc(null);
+      } else if (e.key === '+' || e.key === '=') {
+        handleZoomIn();
+      } else if (e.key === '-') {
+        handleZoomOut();
+      } else if (e.key === 'r' || e.key === 'R') {
+        handleRotateCw();
+      } else if (e.key === '0') {
+        handleResetQuickView();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [quickViewDoc]);
 
   // Multi-selection state
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
@@ -799,6 +871,18 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
                     جزئیات
                   </button>
 
+                  {doc.scanImageUrl && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenQuickView(doc)}
+                      className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-medium py-1 px-2 rounded hover:bg-slate-800 transition-colors"
+                      title="پیش‌نمایش سریع تصویر/فایل سند در تمام‌صفحه با زوم و چرخش"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      پیش‌نمایش سریع
+                    </button>
+                  )}
+
                   <button
                     onClick={() => onAskAboutDoc(doc)}
                     className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-medium py-1 px-2 rounded hover:bg-slate-800 transition-colors"
@@ -1480,6 +1564,28 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
                   )}
                 </div>
 
+                {activeDocForModal.scanImageUrl && (
+                  <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-800 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                        <Eye className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">فایل دیجیتال اسکن سند پیوست است</div>
+                        <div className="text-[11px] text-slate-400 font-mono truncate max-w-xs">{activeDocForModal.fileName || 'تصویر اصل مدرک'}</div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenQuickView(activeDocForModal)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg transition-colors shadow-sm"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      پیش‌نمایش سریع، زوم و چرخش
+                    </button>
+                  </div>
+                )}
+
                 <div>
                   <h4 className="font-bold text-amber-400 text-xs mb-1">شرح موضوع و خلاصه حقوقی:</h4>
                   <p className="text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-800 text-justify">
@@ -1529,6 +1635,190 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QUICK VIEW FULLSCREEN MODAL (WITH ZOOM, ROTATION, RESET & DOWNLOAD) */}
+      {quickViewDoc && (
+        <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col animate-in fade-in select-none">
+          {/* Header */}
+          <div className="px-4 py-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-sm font-bold text-white truncate max-w-md">
+                    {quickViewDoc.title}
+                  </h3>
+                  <span className="text-[10px] font-mono bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded">
+                    {quickViewDoc.pelakCode}
+                  </span>
+                  <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                    {getCategoryLabel(quickViewDoc.category)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-0.5 font-mono">
+                  {quickViewDoc.documentNumber && <span>شماره: {quickViewDoc.documentNumber}</span>}
+                  {quickViewDoc.issueDate && <span>· تاریخ: {toPersianDigits(quickViewDoc.issueDate)}</span>}
+                  {quickViewDoc.fileName && <span className="truncate max-w-xs text-slate-300">· فایل: {quickViewDoc.fileName}</span>}
+                </div>
+              </div>
+            </div>
+
+            {/* Top Right Close & Download Action */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleDownloadQuickViewFile}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs rounded-xl transition-colors"
+                title="دانلود فایل اصلی"
+              >
+                <Download className="w-3.5 h-3.5 text-sky-400" />
+                <span>دانلود فایل</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setQuickViewDoc(null)}
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+                title="بستن (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Visual Display Area */}
+          <div className="flex-1 overflow-auto flex items-center justify-center p-4 relative min-h-0 bg-radial from-slate-900 to-slate-950">
+            {quickViewDoc.scanImageUrl ? (
+              quickViewDoc.fileMimeType?.includes('pdf') ||
+              quickViewDoc.scanImageUrl.startsWith('data:application/pdf') ||
+              quickViewDoc.fileName?.toLowerCase().endsWith('.pdf') ? (
+                <div className="w-full h-full max-w-5xl rounded-xl overflow-hidden border border-slate-800 bg-slate-900 flex flex-col shadow-2xl">
+                  <iframe
+                    src={quickViewDoc.scanImageUrl}
+                    className="w-full h-full bg-white"
+                    title={quickViewDoc.title}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="max-w-full max-h-full flex items-center justify-center p-4"
+                  style={{
+                    transform: `scale(${zoomScale}) rotate(${rotationDeg}deg)`,
+                    transition: 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)',
+                    transformOrigin: 'center center',
+                  }}
+                >
+                  <img
+                    src={quickViewDoc.scanImageUrl}
+                    alt={quickViewDoc.title}
+                    className="max-h-[75vh] max-w-[85vw] object-contain rounded-xl shadow-2xl border border-slate-800/80 pointer-events-none select-none"
+                    draggable={false}
+                  />
+                </div>
+              )
+            ) : (
+              <div className="text-center p-8 bg-slate-900/80 border border-slate-800 rounded-2xl max-w-md">
+                <FileWarning className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                <h4 className="text-sm font-bold text-white mb-1">پیش‌نمایش تصویر برای این سند یافت نشد</h4>
+                <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                  این سند به صورت متنی یا دستی در سامانه ثبت شده و تصویر یا فایل پیوست ندارد.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveDocForModal(quickViewDoc);
+                    setQuickViewDoc(null);
+                  }}
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl"
+                >
+                  مشاهده شناسنامه متنی سند
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Floating Glass Bottom Toolbar (Zoom, Rotation, Reset, Download) */}
+          <div className="px-4 py-3 bg-slate-900/90 border-t border-slate-800 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2 bg-slate-950/80 border border-slate-700/80 rounded-2xl px-3 py-1.5 shadow-2xl backdrop-blur-md">
+              {/* Zoom Out */}
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={zoomScale <= 0.5}
+                className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                title="کوچک‌نمایی (-)"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+
+              {/* Zoom Percentage */}
+              <span className="text-xs font-mono font-bold text-amber-400 min-w-[50px] text-center tabular-nums">
+                {toPersianDigits(Math.round(zoomScale * 100))}%
+              </span>
+
+              {/* Zoom In */}
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={zoomScale >= 4}
+                className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                title="بزرگ‌نمایی (+)"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+
+              <span className="h-4 w-px bg-slate-800 mx-1" />
+
+              {/* Rotate Counter-Clockwise */}
+              <button
+                type="button"
+                onClick={handleRotateCcw}
+                className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                title="چرخش ۹۰ درجه پادساعتگرد"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+
+              {/* Rotate Clockwise */}
+              <button
+                type="button"
+                onClick={handleRotateCw}
+                className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                title="چرخش ۹۰ درجه ساعتگرد (R)"
+              >
+                <RotateCw className="w-4 h-4" />
+              </button>
+
+              {/* Reset Zoom & Rotation */}
+              <button
+                type="button"
+                onClick={handleResetQuickView}
+                className="flex items-center gap-1 px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                title="بازنشانی اندازه و زاویه (0)"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-sky-400" />
+                <span className="text-[11px]">ریست</span>
+              </button>
+
+              <span className="h-4 w-px bg-slate-800 mx-1" />
+
+              {/* Download */}
+              <button
+                type="button"
+                onClick={handleDownloadQuickViewFile}
+                disabled={!quickViewDoc.scanImageUrl}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg transition-colors shadow-sm disabled:opacity-40"
+                title="دانلود سند روی رایانه"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="text-[11px]">دانلود</span>
+              </button>
             </div>
           </div>
         </div>

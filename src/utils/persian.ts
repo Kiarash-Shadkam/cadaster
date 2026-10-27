@@ -48,6 +48,13 @@ export function getStatusLabel(status: string): { label: string; bg: string; tex
         text: 'text-amber-400',
         border: 'border-amber-700/50',
       };
+    case 'closed':
+      return {
+        label: 'مختومه و بایگانی‌شده',
+        bg: 'bg-slate-800/80',
+        text: 'text-slate-300',
+        border: 'border-slate-700/60',
+      };
     case 'pending':
     default:
       return {

@@ -29,6 +29,7 @@ interface CadastreTreeProps {
   onAddPelak: (newNode: Partial<PelakNode>) => void;
   onUpdatePelak?: (pelakId: string, updates: Partial<PelakNode>) => void;
   onGoToScanner?: () => void;
+  externalStatusFilter?: string;
 }
 
 export const CadastreTree: React.FC<CadastreTreeProps> = ({
@@ -39,10 +40,17 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
   onAddPelak,
   onUpdatePelak,
   onGoToScanner,
+  externalStatusFilter,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>(externalStatusFilter || 'all');
   const [activeDomainFilter, setActiveDomainFilter] = useState<'all' | 'real_estate' | 'non_land'>('all');
+
+  React.useEffect(() => {
+    if (externalStatusFilter !== undefined) {
+      setStatusFilter(externalStatusFilter);
+    }
+  }, [externalStatusFilter]);
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -288,28 +296,28 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
         <div>
           <h2 className="text-sm font-bold text-white flex items-center gap-2">
-            <Layers className="w-4 h-4 text-amber-400" />
-            پرونده‌های کاداستر و دعاوی حقوقی
+            <Briefcase className="w-4 h-4 text-amber-400" />
+            کارتابل و ساختار پرونده‌ها
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            تفکیک پرونده‌های اراضی و پرونده‌های موضوعی (چک، قرارداد، کیفری)
+            تفکیک پرونده‌های موضوعی (حقوقی، چک و مالی، قراردادها، کیفری) و کاداستر اراضی
           </p>
         </div>
 
         <div className="flex items-center gap-1.5">
           <button
-            onClick={() => handleOpenAddModal('land', 'main')}
+            onClick={() => handleOpenAddModal('non_land')}
             className="flex items-center gap-1 text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2.5 py-1.5 rounded-lg transition-colors shadow-sm"
+          >
+            <Briefcase className="w-3.5 h-3.5" />
+            تشکیل پرونده جدید
+          </button>
+          <button
+            onClick={() => handleOpenAddModal('land', 'main')}
+            className="flex items-center gap-1 text-xs bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 px-2.5 py-1.5 rounded-lg transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             ثبت پلاک ثبتی
-          </button>
-          <button
-            onClick={() => handleOpenAddModal('non_land')}
-            className="flex items-center gap-1 text-xs bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 px-2.5 py-1.5 rounded-lg transition-colors"
-          >
-            <Briefcase className="w-3.5 h-3.5" />
-            تشکیل پرونده موضوعی
           </button>
         </div>
       </div>
@@ -318,21 +326,28 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
       {pelaks.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
           <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-md">
-            <MapPin className="w-7 h-7" />
+            <Briefcase className="w-7 h-7" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-white mb-1">
-              پایگاه داده خام و آماده ورود اسناد واقعی
+              کارتابل پرونده‌ها خام و آماده بارگذاری اسناد
             </h3>
             <p className="text-xs text-slate-400 max-w-sm leading-relaxed mx-auto">
-              عاری از هرگونه نام فرضی. اسناد اسکن‌شده به طور خودکار در دسته‌بندی‌های موضوعی (ملکی، تجاری، قراردادها، کیفری) جای‌گذاری خواهند شد.
+              عاری از هرگونه پرونده یا پلاک فرضی. اسناد اسکن‌شده به طور خودکار بر اساس موضوع (کیفری، تجاری، ملکی، قراردادی و...) در ساختار پرونده‌ها ثبت خواهند شد.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
             <button
-              onClick={() => handleOpenAddModal('land', 'main')}
+              onClick={() => handleOpenAddModal('non_land')}
               className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Briefcase className="w-4 h-4" />
+              تشکیل پرونده موضوعی
+            </button>
+            <button
+              onClick={() => handleOpenAddModal('land', 'main')}
+              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5"
             >
               <Plus className="w-4 h-4" />
               ثبت پلاک ثبتی

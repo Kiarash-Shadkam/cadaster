@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { CadastreTree } from './components/CadastreTree';
 import { CadastreMap } from './components/CadastreMap';
@@ -7,16 +7,28 @@ import { TimelineDisputes } from './components/TimelineDisputes';
 import { DocumentScanner } from './components/DocumentScanner';
 import { LegalChatbot } from './components/LegalChatbot';
 import { SecurityVault } from './components/SecurityVault';
+import { CaseStatusChart } from './components/CaseStatusChart';
+import { GlobalSearchModal } from './components/GlobalSearchModal';
+import { LawyerDesk } from './components/LawyerDesk/LawyerDesk';
 import {
   INITIAL_PELAKS,
   INITIAL_DOCUMENTS,
   INITIAL_DISPUTES,
   INITIAL_TIMELINE,
 } from './data/cadastreData';
-import { PelakNode, LegalDocument, DisputeAlert, TimelineItem, VaultBackupData } from './types/cadastre';
+import {
+  PelakNode,
+  LegalDocument,
+  DisputeAlert,
+  TimelineItem,
+  VaultBackupData,
+  LegalDeadline,
+  FeeRecord,
+} from './types/cadastre';
 import { Scale, ShieldCheck, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
 import { BatchScanProvider, useBatchScan } from './context/BatchScanContext';
 import { toPersianDigits } from './utils/persian';
+import { getDeadlineUrgency } from './utils/legalFormulas';
 
 import {
   initializeDatabase,
@@ -24,25 +36,74 @@ import {
   dbSavePelaks,
   dbSaveDisputes,
   dbSaveTimeline,
+  dbSaveDeadlines,
+  dbSaveFeeRecords,
   dbClearAll,
 } from './utils/indexedDb';
+import { getSecurityProfile } from './utils/securityEngine';
 
 function AppInner() {
   // Vault lock status: if a passcode is already saved, start locked; otherwise unlocked for first setup
   const [isVaultLocked, setIsVaultLocked] = useState<boolean>(() => {
     return !!localStorage.getItem('attorney_vault_passcode');
   });
+  const [isSecuritySettingsOpen, setIsSecuritySettingsOpen] = useState<boolean>(false);
+
+  // Inactivity auto-lock based on lawyer's security profile configuration
+  useEffect(() => {
+    if (isVaultLocked) return;
+
+    let timeoutId: any = null;
+
+    const resetTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      const profile = getSecurityProfile();
+      const minutes = profile?.autoLockMinutes ?? 10;
+      if (minutes > 0) {
+        timeoutId = setTimeout(() => {
+          setIsVaultLocked(true);
+        }, minutes * 60 * 1000);
+      }
+    };
+
+    const activityEvents = ['mousemove', 'keydown', 'touchstart', 'scroll', 'click'];
+    activityEvents.forEach((ev) => window.addEventListener(ev, resetTimer, { passive: true }));
+    resetTimer();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      activityEvents.forEach((ev) => window.removeEventListener(ev, resetTimer));
+    };
+  }, [isVaultLocked]);
 
   // State initialized with initial/cached data, then hydrated from high-capacity IndexedDB
   const [pelaks, setPelaks] = useState<PelakNode[]>(INITIAL_PELAKS);
   const [documents, setDocuments] = useState<LegalDocument[]>(INITIAL_DOCUMENTS);
   const [disputes, setDisputes] = useState<DisputeAlert[]>(INITIAL_DISPUTES);
   const [timeline, setTimeline] = useState<TimelineItem[]>(INITIAL_TIMELINE);
+  const [deadlines, setDeadlines] = useState<LegalDeadline[]>([]);
+  const [feeRecords, setFeeRecords] = useState<FeeRecord[]>([]);
   const [selectedPelakId, setSelectedPelakId] = useState<string>('');
   const [isDbLoaded, setIsDbLoaded] = useState<boolean>(false);
 
-  const [activeTab, setActiveTab] = useState<'cadastre' | 'documents' | 'timeline' | 'scanner' | 'chat'>('cadastre');
+  const [activeTab, setActiveTab] = useState<'cadastre' | 'documents' | 'timeline' | 'scanner' | 'chat' | 'lawyerDesk'>('cadastre');
   const [chatInitialQuery, setChatInitialQuery] = useState<string | null>(null);
+
+  // Global search modal & status filter states
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string | undefined>(undefined);
+
+  // Global search keyboard shortcut (Ctrl + K or Cmd + K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Background Batch Processing state from Context
   const { isProcessingBatch, queue, currentProcessingIndex } = useBatchScan();
@@ -57,6 +118,8 @@ function AppInner() {
         setDocuments(data.documents);
         setDisputes(data.disputes);
         setTimeline(data.timeline);
+        setDeadlines(data.deadlines || []);
+        setFeeRecords(data.feeRecords || []);
         if (data.pelaks.length > 0) {
           setSelectedPelakId((prev) => (prev && data.pelaks.some((p) => p.id === prev) ? prev : data.pelaks[0].id));
         }
@@ -92,6 +155,16 @@ function AppInner() {
     if (!isDbLoaded) return;
     dbSaveTimeline(timeline);
   }, [timeline, isDbLoaded]);
+
+  useEffect(() => {
+    if (!isDbLoaded) return;
+    dbSaveDeadlines(deadlines);
+  }, [deadlines, isDbLoaded]);
+
+  useEffect(() => {
+    if (!isDbLoaded) return;
+    dbSaveFeeRecords(feeRecords);
+  }, [feeRecords, isDbLoaded]);
 
   const selectedPelak = pelaks.find((p) => p.id === selectedPelakId) || (pelaks.length > 0 ? pelaks[0] : null);
 
@@ -392,6 +465,8 @@ function AppInner() {
     if (data.documents) setDocuments(data.documents);
     if (data.disputes) setDisputes(data.disputes);
     if (data.timeline) setTimeline(data.timeline);
+    if (data.deadlines) setDeadlines(data.deadlines);
+    if (data.feeRecords) setFeeRecords(data.feeRecords);
     if (data.pelaks && data.pelaks.length > 0) {
       setSelectedPelakId(data.pelaks[0].id);
     }
@@ -404,6 +479,8 @@ function AppInner() {
       setDocuments([]);
       setDisputes([]);
       setTimeline([]);
+      setDeadlines([]);
+      setFeeRecords([]);
       setSelectedPelakId('');
       await dbClearAll();
       localStorage.removeItem('cadastre_real_pelaks');
@@ -412,6 +489,8 @@ function AppInner() {
       localStorage.removeItem('cadastre_real_timeline');
       localStorage.removeItem('cadaster_legal_chat_sessions_v2');
       localStorage.removeItem('cadaster_legal_chat_active_session_id');
+      localStorage.removeItem('cadaster_legal_deadlines');
+      localStorage.removeItem('cadaster_legal_fee_records');
     }
   };
 
@@ -430,6 +509,8 @@ function AppInner() {
       disputes,
       timeline,
       chatSessions,
+      deadlines,
+      feeRecords,
     };
     const jsonStr = JSON.stringify(backupData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -443,19 +524,54 @@ function AppInner() {
 
   const validDeedsCount = pelaks.filter((p) => p.status === 'valid').length;
 
+  const urgentDeadlinesCount = useMemo(() => {
+    return deadlines.filter((d) => {
+      if (d.isCompleted) return false;
+      const urgency = getDeadlineUrgency(d.calculatedDueDate);
+      return urgency.status === 'urgent' || urgency.status === 'expired';
+    }).length;
+  }, [deadlines]);
+
+  // Strict land pelak count: only counts genuine real estate properties, excluding non-land dossiers
+  const landPelaksCount = useMemo(() => {
+    return pelaks.filter(
+      (p) =>
+        !p.isNonLandDossier &&
+        (p.dossierDomain === 'real_estate' ||
+          (!p.dossierDomain && (p.areaM2 > 0 || (p.deedType && p.deedType !== 'پرونده قضایی حقوقی/کیفری'))))
+    ).length;
+  }, [pelaks]);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Confidential Security Lock Modal */}
+      {/* Confidential Security Lock Modal & Settings */}
       <SecurityVault
         isLocked={isVaultLocked}
         onUnlock={() => setIsVaultLocked(false)}
         onLock={() => setIsVaultLocked(true)}
+        isSettingsOpen={isSecuritySettingsOpen}
+        onCloseSettings={() => setIsSecuritySettingsOpen(false)}
         pelaks={pelaks}
         documents={documents}
         disputes={disputes}
         timeline={timeline}
         onRestoreBackup={handleRestoreBackup}
         onClearAllData={handleClearAllData}
+      />
+
+      {/* Global Search Modal across Dossiers, Documents & Disputes */}
+      <GlobalSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        pelaks={pelaks}
+        documents={documents}
+        disputes={disputes}
+        onSelectPelak={(id) => setSelectedPelakId(id)}
+        onNavigateTab={(tab) => {
+          setActiveTab(tab);
+          setChatInitialQuery(null);
+        }}
+        onAskAboutDoc={handleAskAboutDoc}
       />
 
       {/* Persistent Background Batch Processing Status Ribbon */}
@@ -496,44 +612,61 @@ function AppInner() {
         }}
         selectedPelak={selectedPelak}
         totalPelaksCount={pelaks.length}
+        landPelaksCount={landPelaksCount}
         totalDocsCount={documents.length}
         disputesCount={disputes.length}
         validDeedsCount={validDeedsCount}
+        urgentDeadlinesCount={urgentDeadlinesCount}
         onLockVault={() => setIsVaultLocked(true)}
         onExportBackup={handleExportBackup}
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onOpenSecuritySettings={() => setIsSecuritySettingsOpen(true)}
       />
 
       {/* Main Workspace Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
         {activeTab === 'cadastre' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-full">
-            {/* Hierarchical Cadastral Tree Column */}
-            <div className="lg:col-span-5 h-[700px]">
-              <CadastreTree
-                pelaks={pelaks}
-                documents={documents}
-                selectedPelakId={selectedPelakId}
-                onSelectPelak={setSelectedPelakId}
-                onAddPelak={handleAddPelak}
-                onUpdatePelak={handleUpdatePelak}
-                onGoToScanner={() => setActiveTab('scanner')}
-              />
-            </div>
+          <div className="space-y-5">
+            {/* Dashboard Recharts Pie Chart Widget */}
+            <CaseStatusChart
+              pelaks={pelaks}
+              documents={documents}
+              selectedStatus={selectedStatusFilter}
+              onSelectPelakStatus={(status) => {
+                setSelectedStatusFilter(status === 'all' ? undefined : status);
+              }}
+            />
 
-            {/* Cadastral Map Visualizer Column */}
-            <div className="lg:col-span-7 h-[700px]">
-              <CadastreMap
-                pelaks={pelaks}
-                selectedPelakId={selectedPelakId}
-                onSelectPelak={setSelectedPelakId}
-                onViewDocuments={handleViewDocuments}
-                onOpenChat={handleOpenChat}
-                documents={documents}
-                onUpdatePelak={handleUpdatePelak}
-                onDeletePelak={handleDeletePelak}
-                onDeleteDocument={handleDeleteDocument}
-                onToggleStarDocument={handleToggleStarDocument}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-full">
+              {/* Hierarchical Cadastral Tree Column */}
+              <div className="lg:col-span-5 h-[700px]">
+                <CadastreTree
+                  pelaks={pelaks}
+                  documents={documents}
+                  selectedPelakId={selectedPelakId}
+                  onSelectPelak={setSelectedPelakId}
+                  onAddPelak={handleAddPelak}
+                  onUpdatePelak={handleUpdatePelak}
+                  onGoToScanner={() => setActiveTab('scanner')}
+                  externalStatusFilter={selectedStatusFilter}
+                />
+              </div>
+
+              {/* Cadastral Map Visualizer Column */}
+              <div className="lg:col-span-7 h-[700px]">
+                <CadastreMap
+                  pelaks={pelaks}
+                  selectedPelakId={selectedPelakId}
+                  onSelectPelak={setSelectedPelakId}
+                  onViewDocuments={handleViewDocuments}
+                  onOpenChat={handleOpenChat}
+                  documents={documents}
+                  onUpdatePelak={handleUpdatePelak}
+                  onDeletePelak={handleDeletePelak}
+                  onDeleteDocument={handleDeleteDocument}
+                  onToggleStarDocument={handleToggleStarDocument}
+                />
+              </div>
             </div>
           </div>
         )}
@@ -566,6 +699,23 @@ function AppInner() {
             onSelectPelak={setSelectedPelakId}
             onOpenChatWithTopic={(topic) => handleOpenChat(selectedPelakId, topic)}
             onGoToScanner={() => setActiveTab('scanner')}
+          />
+        )}
+
+        {activeTab === 'lawyerDesk' && (
+          <LawyerDesk
+            pelaks={pelaks}
+            documents={documents}
+            disputes={disputes}
+            deadlines={deadlines}
+            onSaveDeadlines={setDeadlines}
+            feeRecords={feeRecords}
+            onSaveFeeRecords={setFeeRecords}
+            selectedPelakId={selectedPelakId}
+            onSelectPelak={(id) => {
+              setSelectedPelakId(id);
+              setActiveTab('documents');
+            }}
           />
         )}
 

@@ -451,6 +451,8 @@ export const BatchScanProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             fileName: currentItem.name,
             fileSize: currentItem.size,
             isStarred: false,
+            scanImageUrl: base64,
+            fileMimeType: mimeType,
           };
 
           // Register in system
