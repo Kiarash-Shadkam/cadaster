@@ -590,19 +590,32 @@ export const STANDARD_LEGAL_TEMPLATES: LegalDraftTemplate[] = [
 export function interpolateDraftTemplate(
   templateText: string,
   pelak?: PelakNode | null,
-  doc?: LegalDocument | null
+  doc?: LegalDocument | null,
+  allDocs?: LegalDocument[]
 ): string {
   const today = getTodayShamsi();
   let result = templateText;
 
-  const clientName = pelak?.ownerName || doc?.parties.claimant || 'موکل محترم';
-  const defendantName = doc?.parties.defendant || 'خوانده پرونده';
-  const pelakCode = pelak?.code || doc?.pelakCode || 'پلاک ثبتی معین';
-  const sector = pelak?.sector || 'حوزه ثبتی تهران';
-  const courtBranch = doc?.authority || 'شعبه دادگاه عمومی حقوقی';
-  const caseNumber = doc?.documentNumber || 'کلاسه پرونده';
-  const deedNumber = doc?.documentNumber || 'سند مالکیت قطعی';
-  const conflictingDeedNumber = doc?.extractedEntities.conflictingDeedNumbers?.[0] || 'سند معارض ادعایی';
+  // If a single doc isn't explicitly picked, smart-pick from allDocs
+  const docsList = allDocs && allDocs.length > 0 ? allDocs : doc ? [doc] : [];
+  const primaryDoc = doc || docsList[0] || null;
+  const deedDoc = docsList.find((d) => d.category === 'deed' || d.category === 'contract') || primaryDoc;
+  const verdictDoc = docsList.find((d) => d.category === 'verdict' || d.category === 'order') || primaryDoc;
+  const conflictDoc = docsList.find((d) => d.extractedEntities?.conflictingDeedNumbers?.length) || primaryDoc;
+
+  // Extract real parties
+  const clientName = pelak?.ownerName || primaryDoc?.parties.claimant || primaryDoc?.parties.buyer || 'خواهان / موکل محترم';
+  
+  // Extract adverse party / defendant from any document in case
+  const docWithDef = docsList.find((d) => d.parties.defendant || d.parties.notaryOrSeller);
+  const defendantName = docWithDef?.parties.defendant || docWithDef?.parties.notaryOrSeller || 'خوانده محترم دعوا';
+
+  const pelakCode = pelak?.code || primaryDoc?.pelakCode || 'پلاک ثبتی متنازع‌فیه';
+  const sector = pelak?.sector || primaryDoc?.authority || 'حوزه ثبتی تهران';
+  const courtBranch = verdictDoc?.authority || primaryDoc?.authority || `شعبه محترم دادگاه عمومی حقوقی ${sector}`;
+  const caseNumber = verdictDoc?.documentNumber || primaryDoc?.documentNumber || 'کلاسه پرونده';
+  const deedNumber = deedDoc?.documentNumber || 'سند مالکیت رسمی موکل';
+  const conflictingDeedNumber = conflictDoc?.extractedEntities.conflictingDeedNumbers?.[0] || 'سند معارض ادعایی';
 
   const replacements: Record<string, string> = {
     '{{clientName}}': clientName,
@@ -613,11 +626,11 @@ export function interpolateDraftTemplate(
     '{{caseNumber}}': caseNumber,
     '{{deedNumber}}': deedNumber,
     '{{conflictingDeedNumber}}': conflictingDeedNumber,
-    '{{contractNumber}}': caseNumber,
-    '{{contractDate}}': doc?.issueDate || '۱۴۰۲/۰۶/۲۰',
-    '{{documentNumber}}': doc?.documentNumber || '۱۴۰۲/ص/۸۸۹۴',
-    '{{verdictNumber}}': caseNumber,
-    '{{sanaNotificationDate}}': doc?.issueDate || today,
+    '{{contractNumber}}': deedDoc?.documentNumber || caseNumber,
+    '{{contractDate}}': deedDoc?.issueDate || '۱۴۰۲/۰۶/۲۰',
+    '{{documentNumber}}': primaryDoc?.documentNumber || '۱۴۰۲/ص/۸۸۹۴',
+    '{{verdictNumber}}': verdictDoc?.documentNumber || caseNumber,
+    '{{sanaNotificationDate}}': primaryDoc?.issueDate || today,
     '{{todayDate}}': today,
   };
 

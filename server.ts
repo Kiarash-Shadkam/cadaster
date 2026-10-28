@@ -762,6 +762,184 @@ ${JSON.stringify(
   return res.json({ success: true, analysis: fallbackAnalysis });
 });
 
+/**
+ * Route: /api/generate-legal-draft
+ * Smart AI Judicial Drafter & Grounded Legal Analyst for Iranian Cadastre & Land Law
+ */
+app.post('/api/generate-legal-draft', async (req, res) => {
+  const {
+    pelak,
+    documents,
+    currentTemplate,
+    currentDraft,
+    activeFoci,
+    actionType,
+    customPrompt,
+  } = req.body;
+
+  const docList = Array.isArray(documents) ? documents : [];
+  const foci = Array.isArray(activeFoci) ? activeFoci : [];
+
+  const systemPrompt = `شما یک مستشار عالی قضایی، قاضی پیشین دادگاه تجدیدنظر و وکیل پایه یک دادگستری در نظام دادرسی جمهوری اسلامی ایران هستید.
+وظیفه شما نگارش متن رسمی، فاخر، بدون هذیان، بدون حشو و کاملاً انطباق‌یافته بر اساس مشخصات واقعی پرونده، پلاک‌های ثبتی، اسناد مضبوط در پرونده و قوانین حاکم است.
+
+اصول بنیادی نگارش دادخواست و لایحه قضایی:
+۱. انطباق ۱۰۰٪ با واقعیات پرونده:
+   - شماره پلاک ثبتی، بخش ثبتی، نام موکل/مالک، نام خوانده، شماره اسناد و دادنامه‌ها را دقیقاً از اطلاعات ارائه‌شده استخراج و درج فرمایید.
+   - از آوردن مشخصات فرضی، مجهول یا جعلی به شدت پرهیز کنید.
+۲. ساختار رسمی و استاندارد سامانه عدل‌ایران (ثنا):
+   - صدر لایحه: مشخصات مرجع رسیدگی‌کننده، کلاسه، موضوع، مشخصات خواهان و خوانده.
+   - سلام و ادای احترام با ادبیات وزین قضایی.
+   - مقدمه، تبیین سمت و اذن قانونی وکیل.
+   - بندهای منظم و شماره‌گذاری‌شده تحلیلی و مستند (شرح ماوقع، استناد به مدارک، استدلال ماهوی و شکلی).
+   - انطباق با مواد قوانین موضوعه (قانون ثبت اسناد و املاک، قانون حدنگار کاداستر، قانون مدنی، قانون صدور چک، ق.آ.د.م و آیین‌نامه‌ها).
+   - خواسته مشخص و قطعی پایانی به انضمام خسارات دادرسی و حق‌الوکاله وکیل.
+۳. عدم مقدمه‌چینی زائد: مستقیماً متن لایحه یا دادخواست آماده چاپ و تقدیم به محکمه را ارائه دهید و از توضیحات اضافه مانند «در اینجا لایحه شما آماده است» اکیداً خودداری نمایید.`;
+
+  // Build grounded context
+  let caseContext = `مشخصات پرونده ثبتی/قضایی:\n`;
+  if (pelak) {
+    caseContext += `• عنوان پرونده: ${pelak.title || 'پرونده حقوقی'}\n`;
+    caseContext += `• شماره کلاسه / پلاک ثبتی: ${pelak.code || 'نامشخص'}\n`;
+    caseContext += `• بخش ثبتی / حوزه قضایی: ${pelak.sector || 'تهران'}\n`;
+    caseContext += `• نام موکل / مالک رسمی: ${pelak.ownerName || 'موکل'}\n`;
+    caseContext += `• حوزه موضوعی پرونده: ${pelak.dossierDomain || 'ملکی و ثبتی'}\n`;
+    if (pelak.areaM2 > 0) {
+      caseContext += `• مساحت رقبه متنازع‌فیه: ${pelak.areaM2} متر مربع\n`;
+    }
+    if (pelak.deedType) {
+      caseContext += `• نوع سند ابرازی موکل: ${pelak.deedType}\n`;
+    }
+    if (pelak.boundaryDetails) {
+      caseContext += `• حدود اربعه: شمال: ${pelak.boundaryDetails.north || '-'} | جنوب: ${pelak.boundaryDetails.south || '-'} | شرق: ${pelak.boundaryDetails.east || '-'} | غرب: ${pelak.boundaryDetails.west || '-'}\n`;
+    }
+  }
+
+  if (docList.length > 0) {
+    caseContext += `\nمدارک و ادله اثباتی مضبوط در پرونده (${docList.length} مدرک):\n`;
+    docList.forEach((d: any, idx: number) => {
+      caseContext += `${idx + 1}. [${d.title}] شماره: ${d.documentNumber || '-'} | تاریخ: ${d.issueDate || '-'} | مرجع: ${d.authority || '-'} | خواهان: ${d.parties?.claimant || '-'} | خوانده: ${d.parties?.defendant || '-'}\n`;
+      if (d.summary) caseContext += `   خلاصه محتوا: ${d.summary}\n`;
+      if (d.extractedEntities?.conflictingDeedNumbers?.length) {
+        caseContext += `   اسناد معارض شناسایی‌شده: ${d.extractedEntities.conflictingDeedNumbers.join('، ')}\n`;
+      }
+      if (d.extractedEntities?.relevantLegalArticles?.length) {
+        caseContext += `   مواد استنادی مستخرج: ${d.extractedEntities.relevantLegalArticles.join('، ')}\n`;
+      }
+    });
+  }
+
+  const focusInstructions = foci.map((f: string) => {
+    switch (f) {
+      case 'deed_registry':
+        return '• استناد دقیق به شماره اسناد رسمی، تاریخ صدور، دفاتر اسناد رسمی و سوابق ثبتی پلاک در متن لایحه';
+      case 'statutory_articles':
+        return '• استناد تفصیلی به مواد قانونی مدنی، قانون ثبت، لایحه اسناد معارض و آرای وحدت رویه مرتبط';
+      case 'case_facts_disputes':
+        return '• شرح موشکافانه ماوقع، تعارضات ملکی، تصرفات یا عیوب قراردادی مستند به اسناد پرونده';
+      case 'procedural_defenses':
+        return '• طرح ایرادات شکلی، رعایت مواعد قانونی ابلاغ و مواعد دادرسی (ماده ۸۴ ق.آ.د.م)';
+      case 'evidentiary_proof':
+        return '• دسته‌بندی و ارائه فهرست مستند ادله اثبات دعوا در ذیل لایحه با تقاضای معاینه محل و کارشناسی رسمی';
+      default:
+        return `• تمرکز بر ${f}`;
+    }
+  }).join('\n');
+
+  const actionInstruction =
+    actionType === 'full_draft'
+      ? 'تنظیم کامل دادخواست یا لایحه رسمی قضایی از صدر تا ذیل با رعایت تمام موازین'
+      : actionType === 'insert_grounds'
+      ? 'تنظیم بندهای استدلالی و استناد به اسناد رسمی و مواد قانونی جهت درج در میانه لایحه'
+      : actionType === 'rebuttal'
+      ? 'تنظیم بخش پاسخ به ادعاهای واهی طرف مقابل و رد ادله ابرازی ایشان مستنداً به مدارک پرونده'
+      : actionType === 'polish_rewrite'
+      ? 'بازنویسی ادبی متن جاری با ادبیات غنی و فاخر قضایی محاکم تجدیدنظر و دیوان عالی کشور'
+      : `انجام دستور اختصاصی وکیل: "${customPrompt || ''}"`;
+
+  const fullPrompt = `${caseContext}
+
+قالب حقوقی مبنا: ${currentTemplate?.title || 'لایحه دفاعیه'} (${currentTemplate?.category || 'لایحه'})
+مواد قانونی پیشنهادی: ${(currentTemplate?.legalBasis || []).join(' - ') || 'قوانین مدنی و ثبتی'}
+
+متن فعلی در صورت وجود:
+"""
+${(currentDraft || '').slice(0, 1500)}
+"""
+
+محورهای اولویت‌دار استناد وکیل:
+${focusInstructions || '• استناد جامع به اسناد پرونده و قوانین موضوعه'}
+
+دستور کار مشخص:
+${actionInstruction}
+
+لطفاً مستقیماً متن حقوقی آماده تقدیم را تنظیم فرمایید.`;
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: fullPrompt,
+        config: {
+          systemInstruction: systemPrompt,
+          temperature: 0.25,
+        },
+      });
+
+      const replyText = response.text?.trim();
+      if (replyText) {
+        return res.json({ success: true, text: replyText });
+      }
+    } catch (err: any) {
+      console.warn(`Gemini legal drafting attempt ${attempt} failed:`, err?.message || err);
+      if (attempt < 2) {
+        await sleep(1000);
+      }
+    }
+  }
+
+  // High-Fidelity Domain Fallback if API fails or quota exceeded
+  const clientName = pelak?.ownerName || 'خواهان محترم پرونده';
+  const pelakCode = pelak?.code || 'پلاک متنازع‌فیه';
+  const sector = pelak?.sector || 'حوزه ثبتی تهران';
+  const firstDoc = docList[0];
+  const defendantName = firstDoc?.parties?.defendant || 'خوانده محترم دعوا';
+  const courtBranch = firstDoc?.authority || 'شعبه محترم دادگاه عمومی حقوقی';
+  const conflictingDeed = firstDoc?.extractedEntities?.conflictingDeedNumbers?.[0] || 'سند معارض ادعایی';
+
+  const fallbackDraft = `بسمه‌تعالی
+ریاست محترم و مستشاران عالی‌مقام ${courtBranch}
+موضوع: ${currentTemplate?.title || 'لایحه دفاعیه و تقاضای رسیدگی شایسته قضایی'}
+کلاسه پرونده / پلاک ثبتی: ${pelakCode} واقع در حوزه ثبتی ${sector}
+خواهان / موکل: ${clientName} | خوانده / طرف دعوا: ${defendantName}
+
+با سلام و تحیات وافره،
+احتراماً اینجانب به وکالت از خواهان، پیرامون موضوع پرونده متنازع‌فیه مراتب دفاعیات و مبانی استحقاق قانونی موکل را مستنداً به اسناد رسمی مضبوط در پرونده و موازین قانونی به شرح ذیل به استحضار عالی می‌رساند:
+
+۱. شرح ماوقع و مبانی ماهوی استحقاق موکل:
+به موجب اسناد رسمی مالکیت پیوست و سوابق ثبتی پلاک ${pelakCode}، مالکیت شرعی، قطعی و بلامعارض موکل بر رقبه موصوف محرز و مسجل بوده است. متأسفانه اقدامات خوانده محترم و تمسک به ادعاهای فاقد وجاهت قانونی، موجبات تضییع حقوق حقه موکل را فراهم نموده است.
+
+۲. استناد صریح به مدارک و اسناد مثبته مضبوط در پرونده:
+${docList.length > 0 ? docList.map((d: any, i: number) => `• مدرک ردیف ${i + 1}: سند شماره ${d.documentNumber || '-'} مورخ ${d.issueDate || '-'} تحت عنوان «${d.title}» صادره از ${d.authority || '-'} دال بر صحت ادعای موکل و بطلان اقدامات طرف مقابل.`).join('\n') : `• کلیه سوابق مضبوط در پلاک ثبتی ${pelakCode} و استعلامات متخذه از اداره ثبت اسناد و املاک حوزه ${sector}.`}
+${firstDoc?.isForgedOrConflicting ? `• لازم به ذکر است که سند ادعایی شماره ${conflictingDeed} به عنوان سند معارض تلقی گردیده و فاقد اثر اجرایی و مشروعیت قانونی می‌باشد.` : ''}
+
+۳. موازین قانونی و اصول فقهی حاکم بر دعوا:
+• استناد به ${(currentTemplate?.legalBasis || ['مواد ۲۲، ۴۶ و ۴۸ قانون ثبت اسناد و املاک', 'ماده ۱۰ و ۲۱۹ قانون مدنی', 'قاعده فقهی لاضرر و اصل لزوم']).join('، ')}.
+• بر اساس ماده ۲۲ قانون ثبت اسناد و املاک، همین که ملکی مطابق قانون در دفتر املاک به ثبت رسید دولت فقط کسی را که ملک به اسم او ثبت شده یا به او منتقل شده مالک خواهد شناخت.
+
+۴. ادله و امارات اثبات دعوا:
+۱) رونوشت مصدق اسناد مالکیت و سوابق ثبتی پلاک ${pelakCode}
+۲) استعلام رسمی ثبتی از اداره ثبت اسناد و املاک حوزه ${sector}
+۳) نظریه کارشناس رسمی دادگستری در امور ثبتی و نقشه‌برداری کاداستر عنداللزوم
+
+بناءً علی‌هذا، با عنایت به مراتب معروضه و انطباق کامل ادله با مقررات آمره قانونی، صدور تصمیم و رأی شایسته قضایی بر وفق ستون خواسته به انضمام کلیه خسارات دادرسی و حق‌الوکاله وکیل مورد استدعاست.
+
+با تجدید احترام،
+وکیل خواهان - تاریخ تنظیم: ${new Date().toLocaleDateString('fa-IR')}`;
+
+  return res.json({ success: true, text: fallbackDraft });
+});
+
 // Setup Vite or static files
 async function startServer() {
   const isProduction = process.env.NODE_ENV === 'production';

@@ -4,9 +4,13 @@ import {
   PermissionLevel,
   GranteeType,
   CaseSecurityCredential,
+  ClaimedDelegatedCase,
+  PelakNode,
+  LegalDocument,
 } from '../types/cadastre';
 
 const STORAGE_KEY = 'cadaster_access_grants_v3';
+const CLAIMED_CASES_STORAGE_KEY = 'cadaster_claimed_delegated_cases_v1';
 
 /* =========================================================================
    1. Iranian National ID (کد ملی) & Mobile Validation
@@ -784,4 +788,126 @@ export function getPermissionLevelMeta(level: PermissionLevel): {
         canEdit: false,
       };
   }
+}
+
+/* =========================================================================
+   9. Claimed Delegated Cases Across Accounts (دریافت و استقرار پرونده اشتراکی)
+   ========================================================================= */
+
+/**
+ * دریافت لیست پرونده‌های تفویض‌شده‌ای که توسط کاربر این حساب دریافت و ذخیره گردیده‌اند
+ */
+export function getClaimedCases(): ClaimedDelegatedCase[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(CLAIMED_CASES_STORAGE_KEY);
+    if (!raw) return [];
+    const list: ClaimedDelegatedCase[] = JSON.parse(raw);
+    return Array.isArray(list) ? list : [];
+  } catch (err) {
+    console.error('Failed to parse claimed delegated cases:', err);
+    return [];
+  }
+}
+
+/**
+ * ذخیره و به‌روزرسانی لیست پرونده‌های دریافت‌شده
+ */
+export function saveClaimedCases(cases: ClaimedDelegatedCase[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(CLAIMED_CASES_STORAGE_KEY, JSON.stringify(cases));
+  } catch (err) {
+    console.error('Failed to save claimed delegated cases:', err);
+  }
+}
+
+/**
+ * ذخیره پرونده تفویض‌شده جدید در کارتابل کاربر جاری پس از عبور موفق از گیت امنیتی
+ */
+export function claimDelegatedCase(
+  grant: SharedAccessGrant,
+  targetCase: PelakNode,
+  docs?: LegalDocument[]
+): ClaimedDelegatedCase {
+  const current = getClaimedCases();
+  
+  // Remove existing claim for same case if re-claiming
+  const filtered = current.filter((c) => c.caseId !== targetCase.id);
+
+  const newClaim: ClaimedDelegatedCase = {
+    id: `claim-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    grantId: grant.id,
+    caseId: targetCase.id,
+    caseCode: targetCase.code,
+    caseTitle: targetCase.title,
+    delegatorName: grant.granteeName || 'همکار ارشد / وکیل پرونده',
+    permissionLevel: grant.permissionLevel,
+    claimedAt: new Date().toISOString(),
+    expiresAt: grant.expiresAt,
+    recipientNationalId: grant.recipientNationalId,
+    caseSnapshot: targetCase,
+    documentsSnapshot: docs || [],
+  };
+
+  saveClaimedCases([newClaim, ...filtered]);
+
+  // Record audit log
+  recordAuditLog(grant.id, {
+    action: 'login',
+    details: `پرونده «${targetCase.code} - ${targetCase.title}» با موفقیت در میز کار کاربر جدید دریافت و ذخیره گردید.`,
+    caseId: targetCase.id,
+    caseNumber: targetCase.code,
+  });
+
+  return newClaim;
+}
+
+/**
+ * لغو و حذف پرونده تفویض‌شده از کارتابل حساب جاری
+ */
+export function removeClaimedCase(claimId: string): void {
+  const current = getClaimedCases();
+  const updated = current.filter((c) => c.id !== claimId && c.caseId !== claimId);
+  saveClaimedCases(updated);
+}
+
+/**
+ * جستجوی مجوز دسترسی بر اساس توکن، پیوند یا گذرواژه اختصاصی پرونده
+ */
+export function findGrantByTokenOrPassphrase(query: string): SharedAccessGrant | null {
+  if (!query) return null;
+  const cleanQ = query.trim();
+  const grants = getStoredGrants();
+
+  // 1. Direct ID match
+  const byId = grants.find((g) => g.id === cleanQ);
+  if (byId) return byId;
+
+  // 2. URL parsing if full link pasted
+  try {
+    if (cleanQ.includes('?') || cleanQ.includes('http')) {
+      const url = new URL(cleanQ.startsWith('http') ? cleanQ : `https://dummy.local/${cleanQ}`);
+      const token = url.searchParams.get('access_token') || url.searchParams.get('grant_id');
+      if (token) {
+        const byToken = grants.find((g) => g.id === token);
+        if (byToken) return byToken;
+      }
+    }
+  } catch {}
+
+  // 3. Search by Passphrase or Case Security Credential
+  const byPass = grants.find((g) => {
+    if (g.primaryPassphrase && g.primaryPassphrase.trim() === cleanQ) return true;
+    if (g.pinCode && g.pinCode.trim() === cleanQ) return true;
+    if (g.caseCredentials && g.caseCredentials.some((c) => c.passphrase.trim() === cleanQ)) return true;
+    return false;
+  });
+  if (byPass) return byPass;
+
+  // 4. Substring token match
+  const bySub = grants.find((g) => g.id.includes(cleanQ) || cleanQ.includes(g.id));
+  if (bySub) return bySub;
+
+  return null;
 }

@@ -165,10 +165,15 @@ export const LegalDraftingStudio: React.FC<LegalDraftingStudioProps> = ({
   // Sync draft content when template, pelak, or doc changes
   useEffect(() => {
     if (currentTemplate) {
-      const interpolated = interpolateDraftTemplate(currentTemplate.templateContent, currentPelak, currentDoc);
+      const interpolated = interpolateDraftTemplate(
+        currentTemplate.templateContent,
+        currentPelak,
+        currentDoc,
+        relatedDocs
+      );
       setDraftContent(interpolated);
     }
-  }, [selectedTemplateId, activePelakId, activeDocId]);
+  }, [selectedTemplateId, activePelakId, activeDocId, relatedDocs]);
 
   const handleCopy = async () => {
     try {
@@ -355,7 +360,8 @@ export const LegalDraftingStudio: React.FC<LegalDraftingStudioProps> = ({
                 const interpolated = interpolateDraftTemplate(
                   currentTemplate.templateContent,
                   currentPelak,
-                  currentDoc
+                  currentDoc,
+                  relatedDocs
                 );
                 setDraftContent(interpolated);
               }}
@@ -630,28 +636,20 @@ export const LegalDraftingStudio: React.FC<LegalDraftingStudioProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/* Shared API Key Status Indicator / Button */}
+                  {/* Server Gemini AI & Custom API Key Status Indicator / Button */}
                   <button
                     onClick={() => {
                       setApiKeyInput(apiKey);
                       setShowApiKeyModal(true);
                     }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border transition-colors ${
-                      apiKey
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
-                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200 hover:border-slate-700'
-                    }`}
-                    title={
-                      apiKey
-                        ? 'کلید Gemini API متصل است (مشترک با چت‌بات). جهت مشاهده یا ویرایش کلیک کنید.'
-                        : 'کلید API تنظیم نشده؛ موتور داخلی استدلال قضایی فعال است. جهت اتصال به Gemini کلیک کنید.'
-                    }
+                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border transition-colors bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
+                    title="پردازشگر هوش مصنوعی Gemini 3.8 Flash در سرور متصل و فعال است. جهت تنظیم کلید اختصاصی دلخواه کلیک فرمایید."
                   >
-                    <Key className={`w-3.5 h-3.5 ${apiKey ? 'text-emerald-400' : 'text-slate-400'}`} />
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                     <span className="hidden sm:inline">
-                      {apiKey ? 'متصل به Gemini API (مشترک)' : 'استدلال آفلاین (تنظیم کلید)'}
+                      {apiKey ? 'Gemini 3.8 Flash (کلید اختصاصی)' : 'Gemini 3.8 Flash (فعال در سرور)'}
                     </span>
-                    <span className="sm:hidden">{apiKey ? 'Gemini فعال' : 'تنظیم کلید'}</span>
+                    <span className="sm:hidden">Gemini 3.8 فعال</span>
                   </button>
 
                   {/* Toggle Citation Priorities Settings */}

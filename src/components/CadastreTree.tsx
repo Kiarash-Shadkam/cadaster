@@ -21,8 +21,9 @@ import {
   Users,
   CheckSquare,
   Square,
+  FolderDown,
 } from 'lucide-react';
-import { PelakNode, LegalDocument, CaseDomain, DelegatedSession } from '../types/cadastre';
+import { PelakNode, LegalDocument, CaseDomain, DelegatedSession, ClaimedDelegatedCase } from '../types/cadastre';
 import { toPersianDigits, formatArea, getStatusLabel } from '../utils/persian';
 
 interface CadastreTreeProps {
@@ -35,6 +36,9 @@ interface CadastreTreeProps {
   onGoToScanner?: () => void;
   externalStatusFilter?: string;
   onOpenShareModal?: (caseIds?: string[]) => void;
+  onOpenClaimModal?: () => void;
+  claimedCases?: ClaimedDelegatedCase[];
+  onRemoveClaimedCase?: (caseId: string) => void;
   activeDelegatedSession?: DelegatedSession | null;
 }
 
@@ -48,6 +52,9 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
   onGoToScanner,
   externalStatusFilter,
   onOpenShareModal,
+  onOpenClaimModal,
+  claimedCases,
+  onRemoveClaimedCase,
   activeDelegatedSession,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -296,6 +303,15 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
                 <span className="text-xs font-medium text-slate-200 truncate">
                   {node.title}
                 </span>
+                {claimedCases?.some((c) => c.caseId === node.id) && (
+                  <span
+                    className="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-medium flex items-center gap-1 shrink-0"
+                    title={`پرونده تفویض‌شده از: ${claimedCases.find((c) => c.caseId === node.id)?.delegatorName}`}
+                  >
+                    <FolderDown className="w-3 h-3 text-emerald-400" />
+                    <span>تفویض‌شده</span>
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2 text-[11px] text-slate-400">
                 {node.areaM2 > 0 && <span>{formatArea(node.areaM2)} · </span>}
@@ -367,6 +383,16 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
             >
               <Share2 className="w-3.5 h-3.5 text-amber-400" />
               تفویض دسترسی
+            </button>
+          )}
+          {onOpenClaimModal && !activeDelegatedSession && (
+            <button
+              onClick={onOpenClaimModal}
+              className="flex items-center gap-1 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1.5 rounded-lg transition-colors"
+              title="دریافت و استقرار پرونده تفویض‌شده از دیگر اکانت‌ها و همکاران"
+            >
+              <FolderDown className="w-3.5 h-3.5 text-emerald-400" />
+              دریافت پرونده مشترک
             </button>
           )}
           <button

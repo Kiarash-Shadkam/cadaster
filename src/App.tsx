@@ -13,6 +13,7 @@ import { LawyerDesk } from './components/LawyerDesk/LawyerDesk';
 import { CaseSharingModal } from './components/CaseSharingModal';
 import { DelegatedPortalBanner } from './components/DelegatedPortalBanner';
 import { DelegatedAccessGateModal } from './components/DelegatedAccessGateModal';
+import { ClaimDelegatedCaseModal } from './components/ClaimDelegatedCaseModal';
 import {
   INITIAL_PELAKS,
   INITIAL_DOCUMENTS,
@@ -29,8 +30,9 @@ import {
   FeeRecord,
   SharedAccessGrant,
   DelegatedSession,
+  ClaimedDelegatedCase,
 } from './types/cadastre';
-import { Scale, ShieldCheck, Loader2, Sparkles, ArrowLeft, Share2 } from 'lucide-react';
+import { Scale, ShieldCheck, Loader2, Sparkles, ArrowLeft, Share2, FolderDown } from 'lucide-react';
 import { BatchScanProvider, useBatchScan } from './context/BatchScanContext';
 import { toPersianDigits } from './utils/persian';
 import { getDeadlineUrgency } from './utils/legalFormulas';
@@ -38,6 +40,8 @@ import {
   getStoredGrants,
   validateGrantAccess,
   recordAuditLog,
+  getClaimedCases,
+  removeClaimedCase,
 } from './services/accessControlService';
 
 import {
@@ -106,12 +110,25 @@ function AppInner() {
   // Delegation & Access Control State
   const [grants, setGrants] = useState<SharedAccessGrant[]>(() => getStoredGrants());
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [claimedCases, setClaimedCases] = useState<ClaimedDelegatedCase[]>(() => getClaimedCases());
   const [preSelectedCaseIdsForShare, setPreSelectedCaseIdsForShare] = useState<string[]>([]);
   const [activeDelegatedSession, setActiveDelegatedSession] = useState<DelegatedSession | null>(null);
   const [pendingGrantForGate, setPendingGrantForGate] = useState<SharedAccessGrant | null>(null);
 
   const refreshGrants = () => {
     setGrants(getStoredGrants());
+  };
+
+  const handleCaseClaimed = (newClaim: ClaimedDelegatedCase) => {
+    const updated = getClaimedCases();
+    setClaimedCases(updated);
+    setSelectedPelakId(newClaim.caseId);
+  };
+
+  const handleRemoveClaimedCase = (caseId: string) => {
+    removeClaimedCase(caseId);
+    setClaimedCases(getClaimedCases());
   };
 
   // URL query parameter check for ?access_token=...
@@ -243,18 +260,49 @@ function AppInner() {
     dbSaveFeeRecords(feeRecords);
   }, [feeRecords, isDbLoaded]);
 
+  // Combine local pelaks and any claimed delegated cases from other accounts
+  const combinedPelaks = useMemo(() => {
+    const list = [...pelaks];
+    claimedCases.forEach((claim) => {
+      if (!list.some((p) => p.id === claim.caseId)) {
+        list.push({
+          ...claim.caseSnapshot,
+          id: claim.caseId,
+          code: claim.caseCode,
+          title: `[تفویض‌شده] ${claim.caseTitle}`,
+          description: `${claim.caseSnapshot.description || ''} (تفویض‌شده از: ${claim.delegatorName})`,
+        });
+      }
+    });
+    return list;
+  }, [pelaks, claimedCases]);
+
+  const combinedDocuments = useMemo(() => {
+    const list = [...documents];
+    claimedCases.forEach((claim) => {
+      if (claim.documentsSnapshot && Array.isArray(claim.documentsSnapshot)) {
+        claim.documentsSnapshot.forEach((doc) => {
+          if (!list.some((d) => d.id === doc.id)) {
+            list.push(doc);
+          }
+        });
+      }
+    });
+    return list;
+  }, [documents, claimedCases]);
+
   // Effective Pelaks & Documents strictly restricted when in delegated session
   const effectivePelaks = useMemo(() => {
-    if (!activeDelegatedSession) return pelaks;
+    if (!activeDelegatedSession) return combinedPelaks;
     const allowed = new Set(activeDelegatedSession.grant.caseIds);
-    return pelaks.filter((p) => allowed.has(p.id));
-  }, [pelaks, activeDelegatedSession]);
+    return combinedPelaks.filter((p) => allowed.has(p.id));
+  }, [combinedPelaks, activeDelegatedSession]);
 
   const effectiveDocuments = useMemo(() => {
-    if (!activeDelegatedSession) return documents;
+    if (!activeDelegatedSession) return combinedDocuments;
     const allowed = new Set(activeDelegatedSession.grant.caseIds);
-    return documents.filter((d) => allowed.has(d.pelakId));
-  }, [documents, activeDelegatedSession]);
+    return combinedDocuments.filter((d) => allowed.has(d.pelakId));
+  }, [combinedDocuments, activeDelegatedSession]);
 
   // Keep selectedPelakId aligned with effectivePelaks
   useEffect(() => {
@@ -729,6 +777,8 @@ function AppInner() {
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenSecuritySettings={() => setIsSecuritySettingsOpen(true)}
         onOpenShareModal={() => handleOpenShareModal()}
+        onOpenClaimModal={() => setIsClaimModalOpen(true)}
+        claimedCasesCount={claimedCases.length}
         activeDelegatedSession={activeDelegatedSession}
       />
 
@@ -759,6 +809,9 @@ function AppInner() {
                   onGoToScanner={() => setActiveTab('scanner')}
                   externalStatusFilter={selectedStatusFilter}
                   onOpenShareModal={handleOpenShareModal}
+                  onOpenClaimModal={() => setIsClaimModalOpen(true)}
+                  claimedCases={claimedCases}
+                  onRemoveClaimedCase={handleRemoveClaimedCase}
                   activeDelegatedSession={activeDelegatedSession}
                 />
               </div>
@@ -915,6 +968,15 @@ function AppInner() {
           onCancel={() => setPendingGrantForGate(null)}
         />
       )}
+
+      {/* Claim & Import Delegated Case Modal from other accounts */}
+      <ClaimDelegatedCaseModal
+        isOpen={isClaimModalOpen}
+        onClose={() => setIsClaimModalOpen(false)}
+        availablePelaks={pelaks}
+        availableDocuments={documents}
+        onCaseClaimed={handleCaseClaimed}
+      />
 
       {/* Bottom Legal Notice & Privacy Status */}
       <footer className="border-t border-slate-800/80 bg-slate-900/60 py-3 text-xs text-slate-500">

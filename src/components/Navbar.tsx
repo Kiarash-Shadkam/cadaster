@@ -17,6 +17,7 @@ import {
   RotateCcw,
   GripVertical,
   Share2,
+  FolderDown,
 } from 'lucide-react';
 import { PelakNode, DelegatedSession } from '../types/cadastre';
 import { toPersianDigits } from '../utils/persian';
@@ -48,6 +49,8 @@ interface NavbarProps {
   onOpenSearch?: () => void;
   onOpenSecuritySettings?: () => void;
   onOpenShareModal?: () => void;
+  onOpenClaimModal?: () => void;
+  claimedCasesCount?: number;
   activeDelegatedSession?: DelegatedSession | null;
 }
 
@@ -66,6 +69,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSearch,
   onOpenSecuritySettings,
   onOpenShareModal,
+  onOpenClaimModal,
+  claimedCasesCount,
   activeDelegatedSession,
 }) => {
   const {
@@ -197,7 +202,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-amber-200 border border-amber-500/30 rounded-lg transition-colors text-xs font-semibold shadow-sm"
               >
                 <Share2 className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">تفویض و اشتراک</span>
+                <span className="hidden sm:inline">تفویض پرونده</span>
+              </button>
+            )}
+
+            {/* Claim Delegated Case from Other Accounts Button */}
+            {onOpenClaimModal && !activeDelegatedSession && (
+              <button
+                onClick={onOpenClaimModal}
+                title="دریافت پرونده تفویض‌شده از سایر کاربران و ورود امن به کارتابل"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-emerald-200 border border-emerald-500/30 rounded-lg transition-colors text-xs font-semibold shadow-sm"
+              >
+                <FolderDown className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="hidden sm:inline">دریافت پرونده مشترک</span>
+                {claimedCasesCount && claimedCasesCount > 0 ? (
+                  <span className="text-[10px] bg-emerald-600 text-white font-mono px-1.5 py-0.2 rounded-full font-bold">
+                    {toPersianDigits(claimedCasesCount)}
+                  </span>
+                ) : null}
               </button>
             )}
 

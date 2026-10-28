@@ -355,7 +355,6 @@ export interface SharedAccessGrant {
   lastAccessedAt?: string;
   auditLogs: AccessAuditLog[];      // تاریخچه ممیزی کامل اقدامات
 }
-
 export interface DelegatedSession {
   grant: SharedAccessGrant;
   authenticatedAt: string;
@@ -363,6 +362,21 @@ export interface DelegatedSession {
     nationalId?: string;
     mobile?: string;
   };
+}
+
+export interface ClaimedDelegatedCase {
+  id: string; // unique claim id e.g. claim-xxx
+  grantId: string;
+  caseId: string;
+  caseCode: string;
+  caseTitle: string;
+  delegatorName: string; // نام کاربر یا وکیل واگذارکننده
+  permissionLevel: PermissionLevel;
+  claimedAt: string;
+  expiresAt: string;
+  recipientNationalId?: string;
+  caseSnapshot: PelakNode;
+  documentsSnapshot?: LegalDocument[];
 }
 
 
