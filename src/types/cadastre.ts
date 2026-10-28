@@ -300,16 +300,29 @@ export type PermissionLevel =
 
 export type GranteeType = 'collaborator' | 'external_guest';
 
+export interface CaseSecurityCredential {
+  caseId: string;
+  caseCode: string;
+  caseTitle: string;
+  passphrase: string;
+  permissionLevel: PermissionLevel;
+}
+
 export interface AccessAuditLog {
   id: string;
   timestamp: string; // ISO
   action:
     | 'login'
+    | 'identity_verified'
+    | 'authenticator_verified'
     | 'view_case'
     | 'download_document'
     | 'upload_document'
     | 'edit_case'
-    | 'failed_pin';
+    | 'failed_pin'
+    | 'failed_identity'
+    | 'failed_passphrase'
+    | 'failed_authenticator';
   caseId?: string;
   caseNumber?: string;
   documentTitle?: string;
@@ -324,7 +337,16 @@ export interface SharedAccessGrant {
   granteeType: GranteeType;         // نوع گیرنده: همکار دفتری یا پیوند امن مهمان
   caseIds: string[];                // شناسه‌های پرونده‌های منتخب
   permissionLevel: PermissionLevel; // سطح دسترسی
-  pinCode?: string;                 // رمز عبور امنیتی ۴ الی ۶ رقمی (اختیاری یا اجباری)
+
+  // سیستم احراز هویت فردی و Authenticator اختصاصی
+  recipientNationalId?: string;     // کد ملی ۱۰ رقمی شخص مجاز جهت تشخیص هویت قطعی
+  recipientMobile?: string;         // شماره موبایل ثبت‌شده جهت تطبیق هویت
+  totpSecret?: string;              // کلید رمزی Base32 برای نرم‌افزارهای Authenticator (مانند Google / Microsoft Authenticator)
+  totpAuthUri?: string;             // آدرس استاندارد otpauth://totp/... جهت QR یا اتصال نرم‌افزار
+  caseCredentials?: CaseSecurityCredential[]; // گذرواژه‌های اختصاصی مجزا به تفکیک هر پرونده و سطح دسترسی
+  primaryPassphrase?: string;       // گذرواژه امنیتی اصلی تفویض
+
+  pinCode?: string;                 // پین پشتیبان
   createdAt: string;                // تاریخ ایجاد
   expiresAt: string;                // تاریخ و زمان دقیق انقضا
   status: 'active' | 'revoked' | 'expired';
@@ -337,6 +359,10 @@ export interface SharedAccessGrant {
 export interface DelegatedSession {
   grant: SharedAccessGrant;
   authenticatedAt: string;
+  verifiedIdentity?: {
+    nationalId?: string;
+    mobile?: string;
+  };
 }
 
 

@@ -122,10 +122,10 @@ function AppInner() {
       const allGrants = getStoredGrants();
       const targetGrant = allGrants.find((g) => g.id === token);
       if (targetGrant) {
-        if (targetGrant.pinCode) {
+        if (targetGrant.totpSecret || targetGrant.recipientNationalId || targetGrant.pinCode) {
           setPendingGrantForGate(targetGrant);
         } else {
-          const valRes = validateGrantAccess(targetGrant.id);
+          const valRes = validateGrantAccess({ grantId: targetGrant.id });
           if (valRes.success && valRes.grant) {
             setActiveDelegatedSession({ grant: valRes.grant, authenticatedAt: new Date().toISOString() });
             if (valRes.grant.caseIds.length > 0) {
@@ -140,10 +140,10 @@ function AppInner() {
   }, []);
 
   const handleSwitchToDelegatedSession = (grant: SharedAccessGrant) => {
-    if (grant.pinCode) {
+    if (grant.totpSecret || grant.recipientNationalId || grant.pinCode) {
       setPendingGrantForGate(grant);
     } else {
-      const valRes = validateGrantAccess(grant.id);
+      const valRes = validateGrantAccess({ grantId: grant.id });
       if (valRes.success && valRes.grant) {
         setActiveDelegatedSession({ grant: valRes.grant, authenticatedAt: new Date().toISOString() });
         if (valRes.grant.caseIds.length > 0) {

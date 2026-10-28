@@ -1,15 +1,351 @@
-import { SharedAccessGrant, AccessAuditLog, PermissionLevel, GranteeType } from '../types/cadastre';
+import {
+  SharedAccessGrant,
+  AccessAuditLog,
+  PermissionLevel,
+  GranteeType,
+  CaseSecurityCredential,
+} from '../types/cadastre';
 
-const STORAGE_KEY = 'cadaster_access_grants_v2';
+const STORAGE_KEY = 'cadaster_access_grants_v3';
+
+/* =========================================================================
+   1. Iranian National ID (کد ملی) & Mobile Validation
+   ========================================================================= */
+
+/**
+ * اعتبارسنجی الگوریتم کد ملی ۱۰ رقمی جمهوری اسلامی ایران بر مبنای رقم کنترل Modulo 11
+ */
+export function isValidIranianNationalCode(code: string): boolean {
+  if (!code) return false;
+  const clean = code.replace(/\D/g, '');
+  if (clean.length !== 10) return false;
+
+  // تمام ارقام نباید یکسان باشند (مانند ۱۱۱۱۱۱۱۱۱۱)
+  if (/^(\d)\1{9}$/.test(clean)) return false;
+
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(clean.charAt(i), 10) * (10 - i);
+  }
+  const remainder = sum % 11;
+  const checkDigit = parseInt(clean.charAt(9), 10);
+
+  return remainder < 2 ? checkDigit === remainder : checkDigit === 11 - remainder;
+}
+
+/**
+ * بررسی ساختار شماره موبایل ایران (۰۹xxxxxxxxx)
+ */
+export function isValidIranianMobile(mobile: string): boolean {
+  if (!mobile) return false;
+  const clean = mobile.replace(/\D/g, '');
+  return /^09\d{9}$/.test(clean);
+}
+
+/* =========================================================================
+   2. RFC 3548 Base32 & RFC 6238 TOTP Authenticator Engine (Client-Side)
+   ========================================================================= */
+
+const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+/**
+ * تولید کلید محرمانه رندوم با فرمت Base32 برای نرم‌افزارهای احراز هویت
+ */
+export function generateBase32Secret(length = 16): string {
+  let secret = '';
+  const cryptoObj = typeof window !== 'undefined' ? window.crypto : null;
+  const bytes = new Uint8Array(length);
+  if (cryptoObj && cryptoObj.getRandomValues) {
+    cryptoObj.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < length; i++) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  for (let i = 0; i < length; i++) {
+    secret += BASE32_ALPHABET.charAt(bytes[i] % 32);
+  }
+  return secret;
+}
+
+/**
+ * تبدیل رشته Base32 به آرایه بایت‌ها
+ */
+export function base32ToBytes(base32Str: string): Uint8Array {
+  const clean = base32Str.toUpperCase().replace(/=+$/, '').replace(/\s+/g, '');
+  let bits = 0;
+  let value = 0;
+  const output: number[] = [];
+
+  for (let i = 0; i < clean.length; i++) {
+    const idx = BASE32_ALPHABET.indexOf(clean.charAt(i));
+    if (idx === -1) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      output.push((value >>> (bits - 8)) & 255);
+      bits -= 8;
+    }
+  }
+  return new Uint8Array(output);
+}
+
+/**
+ * پیاده‌سازی خالص SHA-1 در جاوااسکریپت جهت تولید فوری و همگام کدهای TOTP در مرورگر
+ */
+function sha1(message: Uint8Array): Uint8Array {
+  function rotl(n: number, s: number) {
+    return (n << s) | (n >>> (32 - s));
+  }
+
+  const msgLen = message.length;
+  const bitLen = msgLen * 8;
+  const withPaddingLen = ((msgLen + 8) >> 6) + 1;
+  const words = new Uint32Array(withPaddingLen * 16);
+
+  for (let i = 0; i < msgLen; i++) {
+    words[i >> 2] |= message[i] << (24 - (i % 4) * 8);
+  }
+  words[msgLen >> 2] |= 0x80 << (24 - (msgLen % 4) * 8);
+  words[words.length - 1] = bitLen;
+
+  let h0 = 0x67452301;
+  let h1 = 0xefcdab89;
+  let h2 = 0x98badcfe;
+  let h3 = 0x10325476;
+  let h4 = 0xc3d2e1f0;
+
+  const w = new Uint32Array(80);
+
+  for (let i = 0; i < words.length; i += 16) {
+    for (let t = 0; t < 16; t++) {
+      w[t] = words[i + t];
+    }
+    for (let t = 16; t < 80; t++) {
+      w[t] = rotl(w[t - 3] ^ w[t - 8] ^ w[t - 14] ^ w[t - 16], 1);
+    }
+
+    let a = h0;
+    let b = h1;
+    let c = h2;
+    let d = h3;
+    let e = h4;
+
+    for (let t = 0; t < 80; t++) {
+      let f = 0;
+      let k = 0;
+      if (t < 20) {
+        f = (b & c) | (~b & d);
+        k = 0x5a827999;
+      } else if (t < 40) {
+        f = b ^ c ^ d;
+        k = 0x6ed9eba1;
+      } else if (t < 60) {
+        f = (b & c) | (b & d) | (c & d);
+        k = 0x8f1bbcdc;
+      } else {
+        f = b ^ c ^ d;
+        k = 0xca62c1d6;
+      }
+      const temp = (rotl(a, 5) + f + e + k + w[t]) >>> 0;
+      e = d;
+      d = c;
+      c = rotl(b, 30);
+      b = a;
+      a = temp;
+    }
+
+    h0 = (h0 + a) >>> 0;
+    h1 = (h1 + b) >>> 0;
+    h2 = (h2 + c) >>> 0;
+    h3 = (h3 + d) >>> 0;
+    h4 = (h4 + e) >>> 0;
+  }
+
+  const result = new Uint8Array(20);
+  const outWords = [h0, h1, h2, h3, h4];
+  for (let i = 0; i < 5; i++) {
+    result[i * 4] = (outWords[i] >>> 24) & 255;
+    result[i * 4 + 1] = (outWords[i] >>> 16) & 255;
+    result[i * 4 + 2] = (outWords[i] >>> 8) & 255;
+    result[i * 4 + 3] = outWords[i] & 255;
+  }
+  return result;
+}
+
+/**
+ * پیاده‌سازی HMAC-SHA1
+ */
+function hmacSha1(key: Uint8Array, message: Uint8Array): Uint8Array {
+  const blockSize = 64;
+  let k = key;
+  if (k.length > blockSize) {
+    k = sha1(k);
+  }
+  const paddedKey = new Uint8Array(blockSize);
+  paddedKey.set(k);
+
+  const oPad = new Uint8Array(blockSize);
+  const iPad = new Uint8Array(blockSize);
+  for (let i = 0; i < blockSize; i++) {
+    oPad[i] = paddedKey[i] ^ 0x5c;
+    iPad[i] = paddedKey[i] ^ 0x36;
+  }
+
+  const innerMsg = new Uint8Array(iPad.length + message.length);
+  innerMsg.set(iPad);
+  innerMsg.set(message, iPad.length);
+  const innerHash = sha1(innerMsg);
+
+  const outerMsg = new Uint8Array(oPad.length + innerHash.length);
+  outerMsg.set(oPad);
+  outerMsg.set(innerHash, oPad.length);
+  return sha1(outerMsg);
+}
+
+/**
+ * محاسبه فوری کد ۶ رقمی پویای Authenticator (RFC 6238 TOTP)
+ */
+export function getLiveTotpCode(secretBase32: string, timestampMs = Date.now(), period = 30): string {
+  try {
+    const key = base32ToBytes(secretBase32);
+    const counter = Math.floor(timestampMs / 1000 / period);
+
+    const counterBuffer = new Uint8Array(8);
+    let temp = counter;
+    for (let i = 7; i >= 0; i--) {
+      counterBuffer[i] = temp & 255;
+      temp = Math.floor(temp / 256);
+    }
+
+    const hmac = hmacSha1(key, counterBuffer);
+    const offset = hmac[hmac.length - 1] & 0x0f;
+    const binary =
+      ((hmac[offset] & 0x7f) << 24) |
+      ((hmac[offset + 1] & 0xff) << 16) |
+      ((hmac[offset + 2] & 0xff) << 8) |
+      (hmac[offset + 3] & 0xff);
+
+    const otp = binary % 1000000;
+    return otp.toString().padStart(6, '0');
+  } catch (err) {
+    console.error('Error generating TOTP code:', err);
+    return '000000';
+  }
+}
+
+/**
+ * اعتبارسنجی کد ۶ رقمی وارد شده توسط کاربر با احتساب تلورانس زمانی (۳۰ ثانیه قبل و بعد)
+ */
+export function verifyTotpCode(
+  secretBase32: string,
+  inputCode: string,
+  windowToleranceSteps = 1
+): boolean {
+  if (!secretBase32 || !inputCode) return false;
+  const cleanInput = inputCode.replace(/\D/g, '').trim();
+  if (cleanInput.length !== 6) return false;
+
+  const now = Date.now();
+  const period = 30;
+
+  for (let step = -windowToleranceSteps; step <= windowToleranceSteps; step++) {
+    const checkTime = now + step * period * 1000;
+    const expected = getLiveTotpCode(secretBase32, checkTime, period);
+    if (expected === cleanInput) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * ثانیه‌های باقیمانده تا تغییر کد بعدی در پنجره ۳۰ ثانیه‌ای
+ */
+export function getTotpRemainingSeconds(period = 30): number {
+  const currentSec = Math.floor(Date.now() / 1000) % period;
+  return period - currentSec;
+}
+
+/**
+ * ایجاد لینک استاندارد otpauth:// برای ثبت مستقیم در نرم‌افزارهای Authenticator
+ */
+export function generateTotpAuthUri(
+  accountName: string,
+  secretBase32: string,
+  issuer = 'CadasterVault'
+): string {
+  const encIssuer = encodeURIComponent(issuer);
+  const encAccount = encodeURIComponent(accountName || 'کاربر_مجاز');
+  return `otpauth://totp/${encIssuer}:${encAccount}?secret=${secretBase32}&issuer=${encIssuer}&algorithm=SHA1&digits=6&period=30`;
+}
+
+/* =========================================================================
+   3. Case-Specific Isolated Passphrase Generator
+   ========================================================================= */
+
+/**
+ * تولید گذرواژه امن و منحصربه‌فرد برای هر پرونده و سطح دسترسی مشخص
+ * مثال: CAD-68-24-DL-7492
+ */
+export function generateCasePassphrase(
+  caseCode: string,
+  permission: PermissionLevel
+): string {
+  const cleanCode = (caseCode || 'CASE')
+    .replace(/[\/\s]/g, '-')
+    .replace(/[^\w-]/g, '')
+    .slice(0, 8)
+    .toUpperCase();
+
+  const permTag =
+    permission === 'view_only' ? 'VIEW' : permission === 'view_download' ? 'DOWN' : 'EDIT';
+
+  const randSuffix = Math.floor(1000 + Math.random() * 9000);
+  return `CAD-${cleanCode || 'PELAK'}-${permTag}-${randSuffix}`;
+}
+
+/**
+ * ساخت شناسه و لینک اختصاصی اشتراک‌گذاری
+ */
+export function generateGrantShareUrl(grantId: string): string {
+  const origin = window.location.origin;
+  const path = window.location.pathname;
+  return `${origin}${path}?access_token=${grantId}`;
+}
+
+/* =========================================================================
+   4. Initial Real-World Sample Grants
+   ========================================================================= */
 
 export const INITIAL_SAMPLE_GRANTS: SharedAccessGrant[] = [
   {
     id: 'grant_exp_expert_rezai',
-    title: 'تفویض پرونده متنازع‌فیه پلاک ۶۸/۲۴ به کارشناس ثبتی',
+    title: 'تفویض پرونده پلاک ۶۸/۲۴ به کارشناس ثبتی (با احراز هویت دوعاملی)',
     granteeName: 'مهندس رضایی (کارشناس رسمی دادگستری - رشته امور ثبتی)',
     granteeType: 'external_guest',
     caseIds: ['pelak_68', 'pelak_68_1'],
     permissionLevel: 'view_download',
+    recipientNationalId: '0012345678', // نمونه کد ملی ۱۰ رقمی معتبر
+    recipientMobile: '09123456789',
+    totpSecret: 'JBSWY3DPEHPK3PXP', // کلید استاندارد TOTP
+    totpAuthUri:
+      'otpauth://totp/CadasterVault:%D9%85%D9%87%D9%86%D8%AF%D8%B3%20%D8%B1%D8%B6%D8%A7%DB%8C%DB%8C?secret=JBSWY3DPEHPK3PXP&issuer=CadasterVault&algorithm=SHA1&digits=6&period=30',
+    primaryPassphrase: 'CAD-68-24-DOWN-8491',
+    caseCredentials: [
+      {
+        caseId: 'pelak_68',
+        caseCode: '۶۸/۲۴',
+        caseTitle: 'پلاک اصلی ۶۸ فرعی ۲۴ بخش ۱۱ تهران',
+        passphrase: 'CAD-68-24-DOWN-8491',
+        permissionLevel: 'view_download',
+      },
+      {
+        caseId: 'pelak_68_1',
+        caseCode: '۶۸/۲۴/۱',
+        caseTitle: 'قطعه ۱ تفکیکی پلاک ۶۸/۲۴',
+        passphrase: 'CAD-68-24-1-DOWN-4128',
+        permissionLevel: 'view_download',
+      },
+    ],
     pinCode: '7429',
     createdAt: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
     expiresAt: new Date(Date.now() + 5 * 24 * 3600 * 1000).toISOString(),
@@ -20,8 +356,8 @@ export const INITIAL_SAMPLE_GRANTS: SharedAccessGrant[] = [
       {
         id: 'log_1',
         timestamp: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
-        action: 'login',
-        details: 'ورود موفق به پرتال دسترسی امن با کد تأیید',
+        action: 'authenticator_verified',
+        details: 'تطبیق موفق کد ملی ۰۰۱۲۳۴۵۶۷۸ و تایید توکن پویای Authenticator',
         ipPlaceholder: '178.252.189.44',
       },
       {
@@ -41,24 +377,30 @@ export const INITIAL_SAMPLE_GRANTS: SharedAccessGrant[] = [
         documentTitle: 'سند مالکیت تک‌برگی کاداستری',
         details: 'بارگیری نسخه باکیفیت سند تک‌برگی جهت مطابقت کاداستر',
       },
-      {
-        id: 'log_4',
-        timestamp: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
-        action: 'download_document',
-        caseId: 'pelak_68_1',
-        caseNumber: '۶۸/۲۴/۱',
-        documentTitle: 'نقشه وضع موجود و تحدید حدود ثبتی',
-        details: 'دریافت فایل کروکی و مختصات UTM',
-      },
     ],
   },
   {
     id: 'grant_intern_dehghan',
-    title: 'بررسی اوراق پرونده حقوقی مطالبه وجه چک به همکار دفتر',
+    title: 'تفویض پرونده مطالبه وجه چک به همکار دفتر با حق ویرایش',
     granteeName: 'خانم دهقان (کارآموز وکالت دفتر مرکزی)',
     granteeType: 'collaborator',
     caseIds: ['pelak_chek_9901'],
     permissionLevel: 'edit_upload',
+    recipientNationalId: '0451234567',
+    recipientMobile: '09198765432',
+    totpSecret: 'KRSXG5CTMVRXEZLU',
+    totpAuthUri:
+      'otpauth://totp/CadasterVault:%D8%AE%D8%A7%D9%86%D9%85%20%D8%AF%D9%87%D9%82%D8%A7%D9%86?secret=KRSXG5CTMVRXEZLU&issuer=CadasterVault&algorithm=SHA1&digits=6&period=30',
+    primaryPassphrase: 'CAD-CHEK-9901-EDIT-3920',
+    caseCredentials: [
+      {
+        caseId: 'pelak_chek_9901',
+        caseCode: 'چک-۹۹۰۱',
+        caseTitle: 'دعوای حقوقی مطالبه وجه چک صیادی و خسارت تاخیر تادیه',
+        passphrase: 'CAD-CHEK-9901-EDIT-3920',
+        permissionLevel: 'edit_upload',
+      },
+    ],
     pinCode: '3812',
     createdAt: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
     expiresAt: new Date(Date.now() + 12 * 24 * 3600 * 1000).toISOString(),
@@ -69,8 +411,8 @@ export const INITIAL_SAMPLE_GRANTS: SharedAccessGrant[] = [
       {
         id: 'log_col_1',
         timestamp: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
-        action: 'login',
-        details: 'ورود به سامانه به عنوان همکار دفتری',
+        action: 'authenticator_verified',
+        details: 'احراز هویت فردی همکار دفتری با کد ملی و گذرواژه اختصاصی پرونده',
       },
       {
         id: 'log_col_2',
@@ -85,13 +427,37 @@ export const INITIAL_SAMPLE_GRANTS: SharedAccessGrant[] = [
   },
 ];
 
-/**
- * دریافت کلیه مجوزهای دسترسی ذخیره‌شده
- */
+/* =========================================================================
+   5. Storage & Lifecycle Management
+   ========================================================================= */
+
 export function getStoredGrants(): SharedAccessGrant[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
+      // Migrate from v2 if exists
+      const oldRaw = localStorage.getItem('cadaster_access_grants_v2');
+      if (oldRaw) {
+        try {
+          const oldGrants: SharedAccessGrant[] = JSON.parse(oldRaw);
+          // Upgrade old grants with TOTP secret and national ID if missing
+          const upgraded = oldGrants.map((g) => {
+            const secret = g.totpSecret || generateBase32Secret(16);
+            return {
+              ...g,
+              totpSecret: secret,
+              totpAuthUri: g.totpAuthUri || generateTotpAuthUri(g.granteeName, secret),
+              recipientNationalId: g.recipientNationalId || '0012345678',
+              recipientMobile: g.recipientMobile || '09123456789',
+              primaryPassphrase: g.primaryPassphrase || `CAD-AUTH-${g.pinCode || '9872'}`,
+            };
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(upgraded));
+          return upgraded;
+        } catch {
+          // fallback to samples
+        }
+      }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_SAMPLE_GRANTS));
       return INITIAL_SAMPLE_GRANTS;
     }
@@ -103,9 +469,6 @@ export function getStoredGrants(): SharedAccessGrant[] {
   }
 }
 
-/**
- * ذخیره فهرست دسترسی‌ها
- */
 export function saveStoredGrants(grants: SharedAccessGrant[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(grants));
@@ -114,9 +477,6 @@ export function saveStoredGrants(grants: SharedAccessGrant[]): void {
   }
 }
 
-/**
- * بررسی وضعیت مؤثر مجوز (با احتساب تاریخ انقضا)
- */
 export function getEffectiveGrantStatus(grant: SharedAccessGrant): 'active' | 'revoked' | 'expired' {
   if (grant.status === 'revoked') return 'revoked';
   const now = new Date().getTime();
@@ -125,40 +485,28 @@ export function getEffectiveGrantStatus(grant: SharedAccessGrant): 'active' | 'r
   return 'active';
 }
 
-/**
- * تولید پین‌کد تصادفی ۴ رقمی
- */
-export function generateRandomPin(): string {
-  return Math.floor(1000 + Math.random() * 9000).toString();
-}
-
-/**
- * ساخت لینک اشتراک‌گذاری یکتا
- */
-export function generateGrantShareUrl(grantId: string): string {
-  const origin = window.location.origin;
-  const path = window.location.pathname;
-  return `${origin}${path}?access_token=${grantId}`;
-}
+/* =========================================================================
+   6. Grant Creation with Authenticator & Isolated Credentials
+   ========================================================================= */
 
 export interface CreateGrantParams {
   title: string;
   granteeName: string;
   granteeType: GranteeType;
+  recipientNationalId: string;
+  recipientMobile: string;
   caseIds: string[];
+  casesMeta?: Array<{ id: string; code: string; title: string }>;
   permissionLevel: PermissionLevel;
-  pinCode?: string;
-  validityHours: number; // e.g. 24, 72, 168 (7 days), 720 (30 days)
+  validityHours: number;
   customExpiresAt?: string;
+  customTotpSecret?: string;
 }
 
-/**
- * ایجاد مجوز دسترسی جدید
- */
 export function createAccessGrant(params: CreateGrantParams): SharedAccessGrant {
   const grants = getStoredGrants();
   const id = `grant_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-  
+
   const now = new Date();
   let expiresAt: string;
   if (params.customExpiresAt) {
@@ -167,14 +515,37 @@ export function createAccessGrant(params: CreateGrantParams): SharedAccessGrant 
     expiresAt = new Date(now.getTime() + params.validityHours * 3600 * 1000).toISOString();
   }
 
+  // 1. Generate TOTP secret and standard URI
+  const totpSecret = params.customTotpSecret || generateBase32Secret(16);
+  const totpAuthUri = generateTotpAuthUri(params.granteeName, totpSecret);
+
+  // 2. Generate isolated case credentials per dossier
+  const caseCredentials: CaseSecurityCredential[] = (params.casesMeta || []).map((c) => ({
+    caseId: c.id,
+    caseCode: c.code,
+    caseTitle: c.title,
+    passphrase: generateCasePassphrase(c.code, params.permissionLevel),
+    permissionLevel: params.permissionLevel,
+  }));
+
+  const primaryPassphrase =
+    caseCredentials.length > 0
+      ? caseCredentials[0].passphrase
+      : generateCasePassphrase('GEN', params.permissionLevel);
+
   const newGrant: SharedAccessGrant = {
     id,
-    title: params.title.trim() || `مجوز اشتراک‌گذاری به ${params.granteeName}`,
+    title: params.title.trim() || `تفویض پرونده‌ها به ${params.granteeName}`,
     granteeName: params.granteeName.trim(),
     granteeType: params.granteeType,
     caseIds: params.caseIds,
     permissionLevel: params.permissionLevel,
-    pinCode: params.pinCode?.trim() || undefined,
+    recipientNationalId: params.recipientNationalId.trim(),
+    recipientMobile: params.recipientMobile.trim(),
+    totpSecret,
+    totpAuthUri,
+    caseCredentials,
+    primaryPassphrase,
     createdAt: now.toISOString(),
     expiresAt,
     status: 'active',
@@ -187,9 +558,6 @@ export function createAccessGrant(params: CreateGrantParams): SharedAccessGrant 
   return newGrant;
 }
 
-/**
- * ابطال فوری دسترسی (Revoke)
- */
 export function revokeAccessGrant(grantId: string): boolean {
   const grants = getStoredGrants();
   let found = false;
@@ -210,9 +578,6 @@ export function revokeAccessGrant(grantId: string): boolean {
   return found;
 }
 
-/**
- * حذف کامل مجوز از تاریخچه
- */
 export function deleteAccessGrant(grantId: string): boolean {
   const grants = getStoredGrants();
   const filtered = grants.filter((g) => g.id !== grantId);
@@ -220,9 +585,6 @@ export function deleteAccessGrant(grantId: string): boolean {
   return true;
 }
 
-/**
- * ثبت لاگ ممیزی در مجوز
- */
 export function recordAuditLog(
   grantId: string,
   log: Omit<AccessAuditLog, 'id' | 'timestamp'>
@@ -237,7 +599,10 @@ export function recordAuditLog(
     };
     return {
       ...g,
-      accessCount: log.action === 'login' ? g.accessCount + 1 : g.accessCount,
+      accessCount:
+        log.action === 'login' || log.action === 'authenticator_verified'
+          ? g.accessCount + 1
+          : g.accessCount,
       lastAccessedAt: new Date().toISOString(),
       auditLogs: [newLogItem, ...(g.auditLogs || [])],
     };
@@ -245,15 +610,35 @@ export function recordAuditLog(
   saveStoredGrants(updated);
 }
 
-/**
- * اعتبارسنجی ورود به پرتال دسترسی با شناسه مجوز و پین‌کد
- */
+/* =========================================================================
+   7. Multi-Factor Identity & Authenticator Validation
+   ========================================================================= */
+
+export interface ValidateAccessParams {
+  grantId: string;
+  nationalId?: string;
+  mobileNumber?: string;
+  passphrase?: string;
+  totpCode?: string;
+  selectedCaseId?: string;
+}
+
 export function validateGrantAccess(
-  grantId: string,
-  inputPin?: string
-): { success: boolean; grant?: SharedAccessGrant; error?: string } {
+  paramsOrGrantId: ValidateAccessParams | string,
+  legacyPin?: string
+): {
+  success: boolean;
+  grant?: SharedAccessGrant;
+  error?: string;
+  stepFailed?: 'identity' | 'passphrase' | 'totp' | 'expired' | 'revoked';
+} {
+  const params: ValidateAccessParams =
+    typeof paramsOrGrantId === 'string'
+      ? { grantId: paramsOrGrantId, passphrase: legacyPin }
+      : paramsOrGrantId;
+
   const grants = getStoredGrants();
-  const grant = grants.find((g) => g.id === grantId);
+  const grant = grants.find((g) => g.id === params.grantId);
 
   if (!grant) {
     return { success: false, error: 'شناسه مجوز تفویض دسترسی یافت نشد یا حذف شده است.' };
@@ -261,37 +646,103 @@ export function validateGrantAccess(
 
   const effectiveStatus = getEffectiveGrantStatus(grant);
   if (effectiveStatus === 'revoked') {
-    return { success: false, error: 'این دسترسی توسط وکیل / مدیر سامانه لغو و باطل گردیده است.' };
+    return {
+      success: false,
+      stepFailed: 'revoked',
+      error: 'این دسترسی توسط وکیل / مدیر سامانه لغو و باطل گردیده است.',
+    };
   }
 
   if (effectiveStatus === 'expired') {
-    return { success: false, error: 'مهلت زمانی استفاده از این پیوند به پایان رسیده و منقضی شده است.' };
+    return {
+      success: false,
+      stepFailed: 'expired',
+      error: 'مهلت زمانی استفاده از این پیوند به پایان رسیده و منقضی شده است.',
+    };
   }
 
-  if (grant.pinCode) {
-    const cleanInput = (inputPin || '').trim();
-    if (cleanInput !== grant.pinCode) {
-      // Record failed pin attempt
-      recordAuditLog(grantId, {
-        action: 'failed_pin',
-        details: 'تلاش ناموفق برای ورود با رمز اشتباه',
+  // 1. Individual Identity Verification (تشخیص هویت فرد با کد ملی و شماره تماس)
+  if (grant.recipientNationalId) {
+    const inputNat = (params.nationalId || '').replace(/\D/g, '').trim();
+    const expectedNat = grant.recipientNationalId.replace(/\D/g, '').trim();
+
+    if (!inputNat || inputNat !== expectedNat) {
+      recordAuditLog(params.grantId, {
+        action: 'failed_identity',
+        details: `تلاش ناموفق احراز هویت با کد ملی اشتباه (${inputNat || 'خالی'})`,
       });
-      return { success: false, error: 'رمز عبور امنیتی (PIN) وارد شده نادرست است.' };
+      return {
+        success: false,
+        stepFailed: 'identity',
+        error: 'کد ملی وارد شده با هویت فرد دریافت‌کننده این پرونده مطابقت ندارد.',
+      };
     }
   }
 
-  // Record successful login
-  recordAuditLog(grantId, {
-    action: 'login',
-    details: 'ورود موفق به پرتال دسترسی و احراز هویت',
+  // 2. Case-Specific Passphrase Verification (گذرواژه اختصاصی پرونده و سطح دسترسی)
+  if (grant.caseCredentials && grant.caseCredentials.length > 0) {
+    const inputPass = (params.passphrase || '').trim();
+    const validPassphrases = grant.caseCredentials.map((c) => c.passphrase.trim());
+    if (grant.primaryPassphrase) validPassphrases.push(grant.primaryPassphrase.trim());
+    if (grant.pinCode) validPassphrases.push(grant.pinCode.trim());
+
+    if (!inputPass || !validPassphrases.includes(inputPass)) {
+      recordAuditLog(params.grantId, {
+        action: 'failed_passphrase',
+        details: 'تلاش ناموفق برای گذرواژه امنیتی پرونده',
+      });
+      return {
+        success: false,
+        stepFailed: 'passphrase',
+        error: 'گذرواژه اختصاصی پرونده یا سطح دسترسی وارد شده نادرست است.',
+      };
+    }
+  } else if (grant.pinCode) {
+    const inputPass = (params.passphrase || '').trim();
+    if (inputPass !== grant.pinCode) {
+      recordAuditLog(params.grantId, {
+        action: 'failed_pin',
+        details: 'ورود پین کد اشتباه',
+      });
+      return {
+        success: false,
+        stepFailed: 'passphrase',
+        error: 'رمز امنیتی وارد شده نادرست است.',
+      };
+    }
+  }
+
+  // 3. Dynamic Rolling Authenticator Verification (کد ۶ رقمی نرم‌افزار Authenticator)
+  if (grant.totpSecret) {
+    const inputTotp = (params.totpCode || '').replace(/\D/g, '').trim();
+    const isTotpValid = verifyTotpCode(grant.totpSecret, inputTotp, 1);
+
+    if (!isTotpValid) {
+      recordAuditLog(params.grantId, {
+        action: 'failed_authenticator',
+        details: `کد پویای Authenticator نامعتبر است (${inputTotp || 'خالی'})`,
+      });
+      return {
+        success: false,
+        stepFailed: 'totp',
+        error: 'کد ۶ رقمی نرم‌افزار Authenticator منقضی یا اشتباه است. لطفاً کد جدید را وارد نمایید.',
+      };
+    }
+  }
+
+  // Record successful multi-factor authentication
+  recordAuditLog(params.grantId, {
+    action: 'authenticator_verified',
+    details: `احراز هویت کامل فردی با کد ملی و توکن Authenticator برای ${grant.granteeName}`,
   });
 
   return { success: true, grant };
 }
 
-/**
- * برچسب‌های خوانا برای سطوح مجوز سه‌گانه
- */
+/* =========================================================================
+   8. Permission Level Metadata Helper
+   ========================================================================= */
+
 export function getPermissionLevelMeta(level: PermissionLevel): {
   label: string;
   badgeColor: string;

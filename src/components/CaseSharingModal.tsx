@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   X,
   Share2,
@@ -21,14 +21,30 @@ import {
   Trash2,
   Info,
   Lock,
+  Smartphone,
+  Fingerprint,
+  QrCode,
+  Sparkles,
 } from 'lucide-react';
-import { PelakNode, PermissionLevel, GranteeType, SharedAccessGrant, AccessAuditLog } from '../types/cadastre';
+import {
+  PelakNode,
+  PermissionLevel,
+  GranteeType,
+  SharedAccessGrant,
+  CaseSecurityCredential,
+} from '../types/cadastre';
 import {
   createAccessGrant,
   revokeAccessGrant,
   deleteAccessGrant,
   generateGrantShareUrl,
-  generateRandomPin,
+  generateBase32Secret,
+  generateTotpAuthUri,
+  getLiveTotpCode,
+  getTotpRemainingSeconds,
+  generateCasePassphrase,
+  isValidIranianNationalCode,
+  isValidIranianMobile,
   getEffectiveGrantStatus,
   getPermissionLevelMeta,
 } from '../services/accessControlService';
@@ -54,34 +70,55 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
   onSwitchToDelegatedSession,
 }) => {
   const [activeTab, setActiveTab] = useState<'create' | 'list'>('create');
-  
-  // Create Form State
+
+  // Recipient Identity State
   const [granteeName, setGranteeName] = useState('');
+  const [recipientNationalId, setRecipientNationalId] = useState('');
+  const [recipientMobile, setRecipientMobile] = useState('');
   const [grantTitle, setGrantTitle] = useState('');
   const [granteeType, setGranteeType] = useState<GranteeType>('collaborator');
+
+  // Case & Permission State
   const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>(initialSelectedCaseIds);
   const [permissionLevel, setPermissionLevel] = useState<PermissionLevel>('view_download');
-  const [requirePin, setRequirePin] = useState<boolean>(true);
-  const [pinCode, setPinCode] = useState<string>(() => generateRandomPin());
   const [validityPreset, setValidityPreset] = useState<number>(168); // 7 days default
   const [caseSearchTerm, setCaseSearchTerm] = useState('');
-  
-  // Created Result State
+
+  // Authenticator State
+  const [totpSecret, setTotpSecret] = useState<string>(() => generateBase32Secret(16));
+  const [liveTotpCode, setLiveTotpCode] = useState<string>('');
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(30);
+
+  // Success / Post-Create State
   const [justCreatedGrant, setJustCreatedGrant] = useState<SharedAccessGrant | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedSecret, setCopiedSecret] = useState(false);
+  const [copiedPassphrase, setCopiedPassphrase] = useState<string | null>(null);
 
   // Audit Logs Viewer State
   const [selectedGrantForLogs, setSelectedGrantForLogs] = useState<SharedAccessGrant | null>(null);
 
-  // Sync initialSelectedCaseIds when modal opens or initial selection changes
-  React.useEffect(() => {
+  // Live TOTP ticker for preview
+  useEffect(() => {
+    if (!totpSecret) return;
+    const updateTicker = () => {
+      setLiveTotpCode(getLiveTotpCode(totpSecret));
+      setRemainingSeconds(getTotpRemainingSeconds());
+    };
+    updateTicker();
+    const interval = setInterval(updateTicker, 1000);
+    return () => clearInterval(interval);
+  }, [totpSecret]);
+
+  // Sync initialSelectedCaseIds when modal opens or selection changes
+  useEffect(() => {
     if (initialSelectedCaseIds.length > 0) {
       setSelectedCaseIds(initialSelectedCaseIds);
     }
   }, [initialSelectedCaseIds]);
 
-  // Reset just created grant on tab switch
-  React.useEffect(() => {
+  // Reset created grant on tab switch
+  useEffect(() => {
     setJustCreatedGrant(null);
   }, [activeTab]);
 
@@ -112,25 +149,42 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
     }
   };
 
+  const isNationalIdChecksumValid = isValidIranianNationalCode(recipientNationalId);
+
   const handleCreateGrant = (e: React.FormEvent) => {
     e.preventDefault();
     if (!granteeName.trim()) {
-      alert('لطفاً نام همکار یا شخص دریافت‌کننده دسترسی را وارد نمایید.');
+      alert('لطفاً نام دریافت‌کننده مجاز را وارد نمایید.');
+      return;
+    }
+    if (!recipientNationalId.trim() || recipientNationalId.replace(/\D/g, '').length !== 10) {
+      alert('لطفاً کد ملی ۱۰ رقمی دریافت‌کننده را به درستی وارد نمایید.');
       return;
     }
     if (selectedCaseIds.length === 0) {
-      alert('لطفاً حداقل یک پرونده را جهت اشتراک‌گذاری انتخاب فرمایید.');
+      alert('لطفاً حداقل یک پرونده را جهت تفویض دسترسی انتخاب فرمایید.');
       return;
     }
+
+    const selectedCasesMeta = pelaks
+      .filter((p) => selectedCaseIds.includes(p.id))
+      .map((p) => ({
+        id: p.id,
+        code: p.code,
+        title: p.title,
+      }));
 
     const newGrant = createAccessGrant({
       title: grantTitle.trim() || `تفویض پرونده‌ها به ${granteeName.trim()}`,
       granteeName: granteeName.trim(),
       granteeType,
+      recipientNationalId: recipientNationalId.trim(),
+      recipientMobile: recipientMobile.trim(),
       caseIds: selectedCaseIds,
+      casesMeta: selectedCasesMeta,
       permissionLevel,
-      pinCode: requirePin ? pinCode : undefined,
       validityHours: validityPreset,
+      customTotpSecret: totpSecret,
     });
 
     setJustCreatedGrant(newGrant);
@@ -144,8 +198,24 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
     setTimeout(() => setCopiedLink(false), 2500);
   };
 
+  const handleCopySecret = (secret: string) => {
+    navigator.clipboard.writeText(secret);
+    setCopiedSecret(true);
+    setTimeout(() => setCopiedSecret(false), 2500);
+  };
+
+  const handleCopyText = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedPassphrase(key);
+    setTimeout(() => setCopiedPassphrase(null), 2500);
+  };
+
   const handleRevoke = (grantId: string) => {
-    if (window.confirm('آیا از لغو فوری این دسترسی اطمینان دارید؟ دریافت‌کننده بلافاصله از دسترسی به پرونده‌ها منع خواهد شد.')) {
+    if (
+      window.confirm(
+        'آیا از لغو فوری این دسترسی اطمینان دارید؟ دریافت‌کننده بلافاصله از دسترسی به پرونده‌ها منع خواهد شد.'
+      )
+    ) {
       revokeAccessGrant(grantId);
       onRefreshGrants();
     }
@@ -160,19 +230,19 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto animate-in fade-in">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-6 flex flex-col max-h-[90vh]">
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-6 flex flex-col max-h-[92vh]">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90 sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <Share2 className="w-5 h-5" />
+              <Smartphone className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
-                مرکز اشتراک‌گذاری و تفویض پرونده‌ها (Access Delegation Hub)
+                مرکز تفویض پرونده‌ها با Authenticator و تشخیص هویت فرد
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                تعریف همکار دفتری، تولید پیوند رمزدار، کنترل سطوح دسترسی اسناد و ممیزی ورود
+                تطبیق کد ملی فرد، احراز هویت دوعاملی (TOTP) و گذرواژه‌های تفکیک‌شده به ازای هر پرونده
               </p>
             </div>
           </div>
@@ -211,7 +281,7 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
             }`}
           >
             <Shield className="w-4 h-4" />
-            دسترسی‌های فعال و تاریخچه
+            دسترسی‌های فعال و لاگ ممیزی
             <span className="px-1.5 py-0.2 bg-slate-800 text-slate-300 rounded text-[11px] font-mono">
               {toPersianDigits(grants.length)}
             </span>
@@ -223,55 +293,152 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
           {activeTab === 'create' && (
             <>
               {justCreatedGrant ? (
-                /* Success Screen with Copy Link */
-                <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-6 text-center space-y-4 animate-in zoom-in-95">
+                /* Success Screen with Credentials Card */
+                <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-6 text-center space-y-5 animate-in zoom-in-95">
                   <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-7 h-7" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-emerald-300">
-                      مجوز تفویض دسترسی با موفقیت ایجاد شد
+                      تفویض پرونده‌ها با تایید هویت و Authenticator صادر شد
                     </h3>
                     <p className="text-xs text-emerald-400/80 mt-1">
-                      پیوند امن زیر آماده ارسال به دریافت‌کننده است. اطلاعات پرونده‌های منتخب به صورت خودکار محدود گردیدند.
+                      اطلاعات احراز هویت و گذرواژه‌های تفکیک‌شده پرونده‌ها برای ارائه به کاربر در زیر درج گردیده است.
                     </p>
                   </div>
 
-                  {/* Summary Box */}
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 text-right space-y-2 text-xs">
-                    <div className="flex justify-between items-center text-slate-300">
-                      <span className="text-slate-400">گیرنده دسترسی:</span>
-                      <span className="font-bold text-white">{justCreatedGrant.granteeName}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-slate-300">
-                      <span className="text-slate-400">تعداد پرونده‌های مجاز:</span>
-                      <span className="font-mono font-bold text-amber-400">
-                        {toPersianDigits(justCreatedGrant.caseIds.length)} پرونده
+                  {/* Summary & Identity Card */}
+                  <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-right space-y-3 text-xs">
+                    <div className="border-b border-slate-800 pb-2 flex items-center justify-between">
+                      <span className="font-bold text-white flex items-center gap-1.5">
+                        <Fingerprint className="w-4 h-4 text-amber-400" />
+                        هویت فردی شخص مجاز:
+                      </span>
+                      <span className="font-mono text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                        {justCreatedGrant.granteeType === 'collaborator' ? 'همکار دفتری' : 'کارشناس رسمی / مهمان'}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-slate-300">
-                      <span className="text-slate-400">سطح دسترسی به اسناد:</span>
-                      <span className="font-semibold text-slate-200">
-                        {getPermissionLevelMeta(justCreatedGrant.permissionLevel).label}
-                      </span>
-                    </div>
-                    {justCreatedGrant.pinCode && (
-                      <div className="flex justify-between items-center text-slate-300">
-                        <span className="text-slate-400">رمز عبور امنیتی (PIN):</span>
-                        <span className="font-mono font-bold text-emerald-400 tracking-wider text-sm bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-500/30">
-                          {justCreatedGrant.pinCode}
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">نام و نام خانوادگی:</span>
+                        <span className="font-bold text-white text-sm mt-0.5 block">{justCreatedGrant.granteeName}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">کد ملی ثبت‌شده:</span>
+                        <span className="font-mono font-bold text-emerald-400 tracking-wider text-sm mt-0.5 block">
+                          {justCreatedGrant.recipientNationalId}
                         </span>
                       </div>
-                    )}
-                    <div className="flex justify-between items-center text-slate-300">
-                      <span className="text-slate-400">تاریخ پایان اعتبار:</span>
-                      <span className="text-slate-300 font-mono text-[11px]">
-                        {new Date(justCreatedGrant.expiresAt).toLocaleString('fa-IR')}
-                      </span>
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">شماره تماس همراه:</span>
+                        <span className="font-mono text-slate-300 text-sm mt-0.5 block">
+                          {justCreatedGrant.recipientMobile || 'ثبت نشده'}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Link Box */}
+                  {/* Authenticator Key & Live TOTP Box */}
+                  <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-right space-y-3 text-xs">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <span className="font-bold text-white flex items-center gap-1.5">
+                        <Smartphone className="w-4 h-4 text-emerald-400" />
+                        تنظیمات نرم‌افزار Authenticator (Google / Microsoft Authenticator):
+                      </span>
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                        <Clock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>شمارش معکوس:</span>
+                        <span className="font-mono text-amber-300 font-bold">
+                          {toPersianDigits(remainingSeconds)} ثانیه
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+                      <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+                        <div>
+                          <div className="text-[10px] text-slate-400">کلید رمزی (Secret Key):</div>
+                          <div className="font-mono font-bold text-white tracking-widest text-xs mt-1">
+                            {justCreatedGrant.totpSecret}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCopySecret(justCreatedGrant.totpSecret || '')}
+                          className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] rounded-lg border border-slate-700 transition-colors flex items-center gap-1"
+                        >
+                          {copiedSecret ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedSecret ? 'کپی شد' : 'کپی کلید'}
+                        </button>
+                      </div>
+
+                      <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+                        <div>
+                          <div className="text-[10px] text-slate-400">کد پویای ۶ رقمی فعلی:</div>
+                          <div className="font-mono font-bold text-emerald-400 tracking-[0.2em] text-base mt-0.5">
+                            {liveTotpCode.slice(0, 3)} {liveTotpCode.slice(3)}
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-slate-500">هر ۳۰ ثانیه تغییر می‌کند</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Isolated Case Passphrases Table */}
+                  {justCreatedGrant.caseCredentials && justCreatedGrant.caseCredentials.length > 0 && (
+                    <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-right space-y-3 text-xs">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <span className="font-bold text-white flex items-center gap-1.5">
+                          <KeyRound className="w-4 h-4 text-amber-400" />
+                          گذرواژه‌های اختصاصی تفکیک‌شده به ازای هر پرونده و سطح دسترسی:
+                        </span>
+                        <span className="text-[11px] text-slate-400">
+                          {toPersianDigits(justCreatedGrant.caseCredentials.length)} پرونده مجزا
+                        </span>
+                      </div>
+
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {justCreatedGrant.caseCredentials.map((cred, idx) => (
+                          <div
+                            key={cred.caseId}
+                            className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-amber-400 font-bold">{cred.caseCode}</span>
+                              <span className="text-slate-300 text-[11px] truncate max-w-xs">{cred.caseTitle}</span>
+                              <span
+                                className={`text-[10px] px-1.5 py-0.2 rounded border ${
+                                  getPermissionLevelMeta(cred.permissionLevel).badgeColor
+                                }`}
+                              >
+                                {getPermissionLevelMeta(cred.permissionLevel).label}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-bold text-emerald-400 text-xs bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                                {cred.passphrase}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyText(cred.passphrase, cred.caseId)}
+                                className="p-1 text-slate-400 hover:text-white"
+                                title="کپی گذرواژه این پرونده"
+                              >
+                                {copiedPassphrase === cred.caseId ? (
+                                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Share Link Box */}
                   <div className="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded-xl p-2 px-3">
                     <input
                       type="text"
@@ -297,6 +464,7 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                     </button>
                   </div>
 
+                  {/* Action Buttons */}
                   <div className="flex items-center justify-center gap-3 pt-2">
                     {onSwitchToDelegatedSession && (
                       <button
@@ -314,8 +482,10 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                       onClick={() => {
                         setJustCreatedGrant(null);
                         setGranteeName('');
+                        setRecipientNationalId('');
+                        setRecipientMobile('');
                         setGrantTitle('');
-                        setPinCode(generateRandomPin());
+                        setTotpSecret(generateBase32Secret(16));
                       }}
                       className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors"
                     >
@@ -326,12 +496,12 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
               ) : (
                 /* Main Creation Form */
                 <form onSubmit={handleCreateGrant} className="space-y-6">
-                  {/* Step 1: Recipient Profile */}
+                  {/* Step 1: Individual Identity Verification Profile */}
                   <div className="bg-slate-950/40 border border-slate-800/80 rounded-xl p-4 space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-200 flex items-center gap-2">
-                        <Users className="w-4 h-4 text-amber-400" />
-                        ۱. مشخصات دریافت‌کننده دسترسی
+                        <Fingerprint className="w-4 h-4 text-amber-400" />
+                        ۱. تشخیص هویت قطعی فرد دریافت‌کننده پرونده
                       </span>
                       <div className="flex bg-slate-900 p-0.5 rounded-lg border border-slate-800 text-[11px]">
                         <button
@@ -354,41 +524,80 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                               : 'text-slate-400 hover:text-slate-200'
                           }`}
                         >
-                          کارشناس رسمی / مهمان بیرونی
+                          کارشناس رسمی / مهمان
                         </button>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
                         <label className="block text-[11px] font-semibold text-slate-300 mb-1.5">
-                          نام و سمت دریافت‌کننده <span className="text-rose-400">*</span>
+                          نام و نام خانوادگی رسمی <span className="text-rose-400">*</span>
                         </label>
                         <input
                           type="text"
                           required
                           value={granteeName}
                           onChange={(e) => setGranteeName(e.target.value)}
-                          placeholder="مثلاً: مهندس رضایی (کارشناس رسمی نقشه) یا خانم حسینی"
+                          placeholder="مثلاً: مهندس رضایی یا خانم حسینی"
                           className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-semibold text-slate-300 mb-1.5">
-                          عنوان یا یادداشت دسترسی (اختیاری)
+                        <label className="text-[11px] font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                          <span>
+                            کد ملی ۱۰ رقمی <span className="text-rose-400">*</span>
+                          </span>
+                          {recipientNationalId.length === 10 && (
+                            <span
+                              className={`text-[10px] font-mono ${
+                                isNationalIdChecksumValid ? 'text-emerald-400' : 'text-rose-400'
+                              }`}
+                            >
+                              {isNationalIdChecksumValid ? '✓ معتبر' : '✕ نامعتبر'}
+                            </span>
+                          )}
                         </label>
                         <input
                           type="text"
-                          value={grantTitle}
-                          onChange={(e) => setGrantTitle(e.target.value)}
-                          placeholder="مثلاً: بررسی تطبیق پلاک ثبتی و کروکی نقشه"
-                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                          required
+                          maxLength={10}
+                          value={recipientNationalId}
+                          onChange={(e) => setRecipientNationalId(e.target.value.replace(/\D/g, ''))}
+                          placeholder="مثلاً: ۰۰۱۲۳۴۵۶۷۸"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-amber-500 transition-colors text-center font-bold tracking-wider"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1.5">
+                          شماره موبایل (جهت تطابق)
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={11}
+                          value={recipientMobile}
+                          onChange={(e) => setRecipientMobile(e.target.value.replace(/\D/g, ''))}
+                          placeholder="مثلاً: ۰۹۱۲۳۴۵۶۷۸۹"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-amber-500 transition-colors text-center"
                         />
                       </div>
                     </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-300 mb-1.5">
+                        عنوان یا یادداشت تفویض (اختیاری)
+                      </label>
+                      <input
+                        type="text"
+                        value={grantTitle}
+                        onChange={(e) => setGrantTitle(e.target.value)}
+                        placeholder="مثلاً: بررسی تطبیق پلاک ثبتی و کروکی نقشه توسط کارشناس رسمی"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                      />
+                    </div>
                   </div>
 
-                  {/* Step 2: Case Selection */}
+                  {/* Step 2: Selective Cases Selection */}
                   <div className="bg-slate-950/40 border border-slate-800/80 rounded-xl p-4 space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -422,7 +631,7 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                     </div>
 
                     {/* Cases Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 bg-slate-900/50 rounded-xl border border-slate-800">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-1 bg-slate-900/50 rounded-xl border border-slate-800">
                       {filteredPelaks.map((p) => {
                         const isSelected = selectedCaseIds.includes(p.id);
                         return (
@@ -527,62 +736,53 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Step 4: Security, PIN & Expiry */}
+                  {/* Step 4: Authenticator 2FA & Expiry */}
                   <div className="bg-slate-950/40 border border-slate-800/80 rounded-xl p-4 space-y-4">
                     <span className="text-xs font-bold text-slate-200 flex items-center gap-2">
-                      <KeyRound className="w-4 h-4 text-amber-400" />
-                      ۴. امنیت، رمز عبور ورود (PIN) و زمان اعتبار
+                      <Smartphone className="w-4 h-4 text-emerald-400" />
+                      ۴. پیکربندی احراز هویت دوعاملی Authenticator و مدت اعتبار
                     </span>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* PIN Configuration */}
-                      <div className="space-y-2">
+                      {/* Authenticator Engine Configuration */}
+                      <div className="space-y-2.5 bg-slate-900/80 border border-slate-800 rounded-xl p-3">
                         <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
-                            <Lock className="w-3.5 h-3.5 text-slate-400" />
-                            حفاظت با رمز عبور موقت (PIN)
-                          </label>
-                          <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-400">
-                            <input
-                              type="checkbox"
-                              checked={requirePin}
-                              onChange={(e) => setRequirePin(e.target.checked)}
-                              className="rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-0"
-                            />
-                            فعال‌سازی رمز
-                          </label>
+                          <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                            <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                            کلید اختصاصی TOTP Authenticator:
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setTotpSecret(generateBase32Secret(16))}
+                            className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                          >
+                            <RefreshCw className="w-3 h-3" />
+                            تولید مجدد
+                          </button>
                         </div>
-                        {requirePin ? (
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={pinCode}
-                              onChange={(e) => setPinCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                              placeholder="کد ۴ الی ۶ رقمی"
-                              className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-emerald-400 font-mono font-bold tracking-widest text-center focus:outline-none focus:border-amber-500 flex-1"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setPinCode(generateRandomPin())}
-                              className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs flex items-center gap-1 transition-colors border border-slate-700"
-                              title="تولید رمز تصادفی جدید"
-                            >
-                              <RefreshCw className="w-3.5 h-3.5" />
-                              تصادفی
-                            </button>
+
+                        <div className="flex items-center justify-between bg-slate-950 p-2 rounded-lg border border-slate-800">
+                          <span className="font-mono text-xs font-bold text-white tracking-widest">
+                            {totpSecret}
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-slate-400">کد زنده:</span>
+                            <span className="font-mono font-bold text-emerald-400 text-xs">
+                              {liveTotpCode}
+                            </span>
                           </div>
-                        ) : (
-                          <p className="text-[11px] text-slate-500 italic">
-                            ورود بدون رمز (تنها با داشتن لینک اختصاصی مستقیم)
-                          </p>
-                        )}
+                        </div>
+
+                        <p className="text-[10px] text-slate-400 leading-relaxed">
+                          این کلید جهت ثبت در نرم‌افزارهای Google Authenticator یا Microsoft Authenticator گیرنده استفاده می‌شود.
+                        </p>
                       </div>
 
                       {/* Expiry Presets */}
                       <div className="space-y-2">
                         <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          مدت اعتبار پیوند اشتراک‌گذاری
+                          مدت اعتبار پیوند تفویض دسترسی
                         </label>
                         <div className="grid grid-cols-4 gap-1.5 text-center">
                           {[
@@ -605,6 +805,9 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                             </button>
                           ))}
                         </div>
+                        <p className="text-[10px] text-slate-500">
+                          پس از اتمام زمان، دسترسی به‌طور خودکار منقضی و مسدود خواهد شد.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -624,7 +827,7 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                       className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Share2 className="w-4 h-4" />
-                      تولید پیوند امن و ثبت تفویض دسترسی
+                      تولید پیوند امن و گذرواژه‌های تفکیک‌شده
                     </button>
                   </div>
                 </form>
@@ -657,9 +860,14 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                         }`}
                       >
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                          <div className="space-y-1">
+                          <div className="space-y-1.5">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-xs font-bold text-white">{grant.granteeName}</span>
+                              {grant.recipientNationalId && (
+                                <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700">
+                                  کد ملی: {grant.recipientNationalId}
+                                </span>
+                              )}
                               <span
                                 className={`text-[10px] px-2 py-0.5 rounded-full border ${
                                   effectiveStatus === 'active'
@@ -678,10 +886,14 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                               <span className={`text-[10px] px-2 py-0.5 rounded border ${permMeta.badgeColor}`}>
                                 {permMeta.label}
                               </span>
-                              <span className="text-[10px] text-slate-500">
-                                {grant.granteeType === 'collaborator' ? 'همکار دفتری' : 'پیوند مهمان'}
-                              </span>
+                              {grant.totpSecret && (
+                                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                  <Smartphone className="w-3 h-3" />
+                                  Authenticator 2FA
+                                </span>
+                              )}
                             </div>
+
                             <div className="text-[11px] text-slate-400 flex items-center gap-2 flex-wrap">
                               <span>عنوان: {grant.title}</span>
                               <span>·</span>
@@ -691,13 +903,13 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                                   {toPersianDigits(grant.caseIds.length)} مورد
                                 </span>
                               </span>
-                              {grant.pinCode && (
+                              {grant.caseCredentials && grant.caseCredentials.length > 0 && (
                                 <>
                                   <span>·</span>
                                   <span>
-                                    رمز:{' '}
+                                    گذرواژه اصلی:{' '}
                                     <span className="font-mono text-emerald-400 font-bold">
-                                      {grant.pinCode}
+                                      {grant.caseCredentials[0].passphrase}
                                     </span>
                                   </span>
                                 </>
@@ -784,7 +996,7 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-blue-400" />
                 <h3 className="text-xs font-bold text-white">
-                  دفترچه ممیزی دسترسی و رخدادها: {selectedGrantForLogs.granteeName}
+                  دفترچه ممیزی هویت و رخدادها: {selectedGrantForLogs.granteeName}
                 </h3>
               </div>
               <button
@@ -795,7 +1007,7 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
               </button>
             </div>
             <div className="p-4 overflow-y-auto space-y-2.5 flex-1">
-              {(!selectedGrantForLogs.auditLogs || selectedGrantForLogs.auditLogs.length === 0) ? (
+              {!selectedGrantForLogs.auditLogs || selectedGrantForLogs.auditLogs.length === 0 ? (
                 <div className="text-center py-8 text-xs text-slate-500">
                   هنوز هیچ رخداد یا بازدیدی برای این مجوز ثبت نگردیده است.
                 </div>
@@ -808,19 +1020,22 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-slate-200">
                         {log.action === 'login' && 'ورود به پرتال'}
+                        {log.action === 'identity_verified' && 'احراز هویت فردی'}
+                        {log.action === 'authenticator_verified' && 'تایید دوعاملی Authenticator'}
                         {log.action === 'view_case' && 'مشاهده پرونده'}
                         {log.action === 'download_document' && 'دانلود مدرک'}
                         {log.action === 'upload_document' && 'بارگذاری سند'}
                         {log.action === 'edit_case' && 'ویرایش پرونده'}
                         {log.action === 'failed_pin' && 'خطای رمز عبور'}
+                        {log.action === 'failed_identity' && 'خطای تطابق کد ملی'}
+                        {log.action === 'failed_passphrase' && 'خطای گذرواژه پرونده'}
+                        {log.action === 'failed_authenticator' && 'خطای توکن Authenticator'}
                       </span>
                       <span className="text-[10px] font-mono text-slate-400">
                         {new Date(log.timestamp).toLocaleString('fa-IR')}
                       </span>
                     </div>
-                    {log.details && (
-                      <p className="text-[11px] text-slate-400">{log.details}</p>
-                    )}
+                    {log.details && <p className="text-[11px] text-slate-400">{log.details}</p>}
                     {(log.caseNumber || log.documentTitle) && (
                       <div className="text-[10px] text-amber-300 font-mono flex items-center gap-2 pt-0.5">
                         {log.caseNumber && <span>پرونده: {log.caseNumber}</span>}
