@@ -40,9 +40,11 @@ import {
   RotateCw,
   RotateCcw,
   Download,
+  Share2,
 } from 'lucide-react';
-import { LegalDocument, PelakNode, CaseDomain, DocumentCategory } from '../types/cadastre';
+import { LegalDocument, PelakNode, CaseDomain, DocumentCategory, DelegatedSession } from '../types/cadastre';
 import { toPersianDigits, getCategoryLabel, getDomainMeta } from '../utils/persian';
+import { recordAuditLog } from '../services/accessControlService';
 
 interface DocumentExplorerProps {
   documents: LegalDocument[];
@@ -64,6 +66,8 @@ interface DocumentExplorerProps {
   onDeleteDocument?: (docId: string) => void;
   onToggleStarDocument?: (docId: string) => void;
   onAutoDeduplicate?: (pelakId?: string) => number;
+  activeDelegatedSession?: DelegatedSession | null;
+  onOpenShareModal?: (caseIds?: string[]) => void;
 }
 
 export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
@@ -81,6 +85,8 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
   onDeleteDocument,
   onToggleStarDocument,
   onAutoDeduplicate,
+  activeDelegatedSession,
+  onOpenShareModal,
 }) => {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterRiskOnly, setFilterRiskOnly] = useState<boolean>(false);
@@ -98,6 +104,17 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
     setQuickViewDoc(doc);
     setZoomScale(1);
     setRotationDeg(0);
+
+    // Audit log if in delegated session
+    if (activeDelegatedSession) {
+      recordAuditLog(activeDelegatedSession.grant.id, {
+        action: 'view_case',
+        caseId: doc.pelakId,
+        caseNumber: doc.pelakCode,
+        documentTitle: doc.title,
+        details: `مشاهده پیش‌نمایش سند: ${doc.title}`,
+      });
+    }
   };
 
   const handleZoomIn = () => {
@@ -123,6 +140,22 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
 
   const handleDownloadQuickViewFile = () => {
     if (!quickViewDoc?.scanImageUrl) return;
+
+    if (activeDelegatedSession && activeDelegatedSession.grant.permissionLevel === 'view_only') {
+      alert('سطح مجوز تفویض‌شده به شما «فقط مشاهده» است و امکان دانلود اسناد مسدود می‌باشد.');
+      return;
+    }
+
+    if (activeDelegatedSession) {
+      recordAuditLog(activeDelegatedSession.grant.id, {
+        action: 'download_document',
+        caseId: quickViewDoc.pelakId,
+        caseNumber: quickViewDoc.pelakCode,
+        documentTitle: quickViewDoc.title,
+        details: `دانلود فایل سند با موفقیت: ${quickViewDoc.title}`,
+      });
+    }
+
     const a = document.createElement('a');
     a.href = quickViewDoc.scanImageUrl;
     const isPdf =
@@ -524,7 +557,19 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              {onUpdatePelak && (
+              {onOpenShareModal && !activeDelegatedSession && (
+                <button
+                  type="button"
+                  onClick={() => onOpenShareModal([currentDossier.id])}
+                  className="px-3 py-1.5 text-xs font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-xl flex items-center gap-1.5 transition-colors shadow-sm"
+                  title="اشتراک‌گذاری و تفویض دسترسی به این پرونده"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-amber-400" />
+                  اشتراک پرونده
+                </button>
+              )}
+
+              {onUpdatePelak && (!activeDelegatedSession || activeDelegatedSession.grant.permissionLevel === 'edit_upload') && (
                 <button
                   type="button"
                   onClick={() => handleOpenEditDossier(currentDossier)}
@@ -536,7 +581,7 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
                 </button>
               )}
 
-              {onDeletePelak && (
+              {onDeletePelak && !activeDelegatedSession && (
                 <button
                   type="button"
                   onClick={() => setDossierToDelete(currentDossier)}
@@ -894,7 +939,7 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
 
                 <div className="flex items-center gap-1.5">
                   {/* Edit / Rename Document */}
-                  {onUpdateDocument && (
+                  {onUpdateDocument && (!activeDelegatedSession || activeDelegatedSession.grant.permissionLevel === 'edit_upload') && (
                     <button
                       type="button"
                       onClick={() => handleOpenEditDoc(doc)}
@@ -906,7 +951,7 @@ export const DocumentExplorer: React.FC<DocumentExplorerProps> = ({
                   )}
 
                   {/* Delete Document */}
-                  {onDeleteDocument && (
+                  {onDeleteDocument && !activeDelegatedSession && (
                     <button
                       type="button"
                       onClick={() => setDocToDelete(doc)}

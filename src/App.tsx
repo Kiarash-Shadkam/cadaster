@@ -10,6 +10,9 @@ import { SecurityVault } from './components/SecurityVault';
 import { CaseStatusChart } from './components/CaseStatusChart';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { LawyerDesk } from './components/LawyerDesk/LawyerDesk';
+import { CaseSharingModal } from './components/CaseSharingModal';
+import { DelegatedPortalBanner } from './components/DelegatedPortalBanner';
+import { DelegatedAccessGateModal } from './components/DelegatedAccessGateModal';
 import {
   INITIAL_PELAKS,
   INITIAL_DOCUMENTS,
@@ -24,11 +27,18 @@ import {
   VaultBackupData,
   LegalDeadline,
   FeeRecord,
+  SharedAccessGrant,
+  DelegatedSession,
 } from './types/cadastre';
-import { Scale, ShieldCheck, Loader2, Sparkles, ArrowLeft } from 'lucide-react';
+import { Scale, ShieldCheck, Loader2, Sparkles, ArrowLeft, Share2 } from 'lucide-react';
 import { BatchScanProvider, useBatchScan } from './context/BatchScanContext';
 import { toPersianDigits } from './utils/persian';
 import { getDeadlineUrgency } from './utils/legalFormulas';
+import {
+  getStoredGrants,
+  validateGrantAccess,
+  recordAuditLog,
+} from './services/accessControlService';
 
 import {
   initializeDatabase,
@@ -92,6 +102,73 @@ function AppInner() {
   // Global search modal & status filter states
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string | undefined>(undefined);
+
+  // Delegation & Access Control State
+  const [grants, setGrants] = useState<SharedAccessGrant[]>(() => getStoredGrants());
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [preSelectedCaseIdsForShare, setPreSelectedCaseIdsForShare] = useState<string[]>([]);
+  const [activeDelegatedSession, setActiveDelegatedSession] = useState<DelegatedSession | null>(null);
+  const [pendingGrantForGate, setPendingGrantForGate] = useState<SharedAccessGrant | null>(null);
+
+  const refreshGrants = () => {
+    setGrants(getStoredGrants());
+  };
+
+  // URL query parameter check for ?access_token=...
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('access_token');
+    if (token) {
+      const allGrants = getStoredGrants();
+      const targetGrant = allGrants.find((g) => g.id === token);
+      if (targetGrant) {
+        if (targetGrant.pinCode) {
+          setPendingGrantForGate(targetGrant);
+        } else {
+          const valRes = validateGrantAccess(targetGrant.id);
+          if (valRes.success && valRes.grant) {
+            setActiveDelegatedSession({ grant: valRes.grant, authenticatedAt: new Date().toISOString() });
+            if (valRes.grant.caseIds.length > 0) {
+              setSelectedPelakId(valRes.grant.caseIds[0]);
+            }
+          } else {
+            alert(valRes.error || 'خطا در اعتبارسنجی پیوند دسترسی');
+          }
+        }
+      }
+    }
+  }, []);
+
+  const handleSwitchToDelegatedSession = (grant: SharedAccessGrant) => {
+    if (grant.pinCode) {
+      setPendingGrantForGate(grant);
+    } else {
+      const valRes = validateGrantAccess(grant.id);
+      if (valRes.success && valRes.grant) {
+        setActiveDelegatedSession({ grant: valRes.grant, authenticatedAt: new Date().toISOString() });
+        if (valRes.grant.caseIds.length > 0) {
+          setSelectedPelakId(valRes.grant.caseIds[0]);
+        }
+      }
+    }
+  };
+
+  const handleExitDelegatedSession = () => {
+    setActiveDelegatedSession(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('access_token');
+    window.history.replaceState({}, '', url.pathname);
+    if (pelaks.length > 0) {
+      setSelectedPelakId(pelaks[0].id);
+    }
+  };
+
+  const handleOpenShareModal = (caseIds?: string[]) => {
+    setPreSelectedCaseIdsForShare(
+      caseIds && caseIds.length > 0 ? caseIds : selectedPelakId ? [selectedPelakId] : []
+    );
+    setIsShareModalOpen(true);
+  };
 
   // Global search keyboard shortcut (Ctrl + K or Cmd + K)
   useEffect(() => {
@@ -166,7 +243,29 @@ function AppInner() {
     dbSaveFeeRecords(feeRecords);
   }, [feeRecords, isDbLoaded]);
 
-  const selectedPelak = pelaks.find((p) => p.id === selectedPelakId) || (pelaks.length > 0 ? pelaks[0] : null);
+  // Effective Pelaks & Documents strictly restricted when in delegated session
+  const effectivePelaks = useMemo(() => {
+    if (!activeDelegatedSession) return pelaks;
+    const allowed = new Set(activeDelegatedSession.grant.caseIds);
+    return pelaks.filter((p) => allowed.has(p.id));
+  }, [pelaks, activeDelegatedSession]);
+
+  const effectiveDocuments = useMemo(() => {
+    if (!activeDelegatedSession) return documents;
+    const allowed = new Set(activeDelegatedSession.grant.caseIds);
+    return documents.filter((d) => allowed.has(d.pelakId));
+  }, [documents, activeDelegatedSession]);
+
+  // Keep selectedPelakId aligned with effectivePelaks
+  useEffect(() => {
+    if (activeDelegatedSession && effectivePelaks.length > 0) {
+      if (!effectivePelaks.some((p) => p.id === selectedPelakId)) {
+        setSelectedPelakId(effectivePelaks[0].id);
+      }
+    }
+  }, [activeDelegatedSession, effectivePelaks, selectedPelakId]);
+
+  const selectedPelak = effectivePelaks.find((p) => p.id === selectedPelakId) || (effectivePelaks.length > 0 ? effectivePelaks[0] : null);
 
   const handleAddPelak = (newNode: Partial<PelakNode>) => {
     const fullNode = newNode as PelakNode;
@@ -603,6 +702,14 @@ function AppInner() {
         </div>
       )}
 
+      {/* Delegated Access Session Banner */}
+      {activeDelegatedSession && (
+        <DelegatedPortalBanner
+          session={activeDelegatedSession}
+          onExit={handleExitDelegatedSession}
+        />
+      )}
+
       {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}
@@ -611,9 +718,9 @@ function AppInner() {
           setChatInitialQuery(null);
         }}
         selectedPelak={selectedPelak}
-        totalPelaksCount={pelaks.length}
+        totalPelaksCount={effectivePelaks.length}
         landPelaksCount={landPelaksCount}
-        totalDocsCount={documents.length}
+        totalDocsCount={effectiveDocuments.length}
         disputesCount={disputes.length}
         validDeedsCount={validDeedsCount}
         urgentDeadlinesCount={urgentDeadlinesCount}
@@ -621,6 +728,8 @@ function AppInner() {
         onExportBackup={handleExportBackup}
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenSecuritySettings={() => setIsSecuritySettingsOpen(true)}
+        onOpenShareModal={() => handleOpenShareModal()}
+        activeDelegatedSession={activeDelegatedSession}
       />
 
       {/* Main Workspace Body */}
@@ -629,8 +738,8 @@ function AppInner() {
           <div className="space-y-5">
             {/* Dashboard Recharts Pie Chart Widget */}
             <CaseStatusChart
-              pelaks={pelaks}
-              documents={documents}
+              pelaks={effectivePelaks}
+              documents={effectiveDocuments}
               selectedStatus={selectedStatusFilter}
               onSelectPelakStatus={(status) => {
                 setSelectedStatusFilter(status === 'all' ? undefined : status);
@@ -641,26 +750,28 @@ function AppInner() {
               {/* Hierarchical Cadastral Tree Column */}
               <div className="lg:col-span-5 h-[700px]">
                 <CadastreTree
-                  pelaks={pelaks}
-                  documents={documents}
+                  pelaks={effectivePelaks}
+                  documents={effectiveDocuments}
                   selectedPelakId={selectedPelakId}
                   onSelectPelak={setSelectedPelakId}
                   onAddPelak={handleAddPelak}
                   onUpdatePelak={handleUpdatePelak}
                   onGoToScanner={() => setActiveTab('scanner')}
                   externalStatusFilter={selectedStatusFilter}
+                  onOpenShareModal={handleOpenShareModal}
+                  activeDelegatedSession={activeDelegatedSession}
                 />
               </div>
 
               {/* Cadastral Map Visualizer Column */}
               <div className="lg:col-span-7 h-[700px]">
                 <CadastreMap
-                  pelaks={pelaks}
+                  pelaks={effectivePelaks}
                   selectedPelakId={selectedPelakId}
                   onSelectPelak={setSelectedPelakId}
                   onViewDocuments={handleViewDocuments}
                   onOpenChat={handleOpenChat}
-                  documents={documents}
+                  documents={effectiveDocuments}
                   onUpdatePelak={handleUpdatePelak}
                   onDeletePelak={handleDeletePelak}
                   onDeleteDocument={handleDeleteDocument}
@@ -673,8 +784,8 @@ function AppInner() {
 
         {activeTab === 'documents' && (
           <DocumentExplorer
-            documents={documents}
-            pelaks={pelaks}
+            documents={effectiveDocuments}
+            pelaks={effectivePelaks}
             selectedPelakId={selectedPelakId}
             onSelectPelak={setSelectedPelakId}
             onAskAboutDoc={handleAskAboutDoc}
@@ -687,6 +798,8 @@ function AppInner() {
             onDeleteDocument={handleDeleteDocument}
             onToggleStarDocument={handleToggleStarDocument}
             onAutoDeduplicate={handleAutoDeduplicate}
+            activeDelegatedSession={activeDelegatedSession}
+            onOpenShareModal={handleOpenShareModal}
           />
         )}
 
@@ -771,6 +884,36 @@ function AppInner() {
             مشاهده صف اسکن
           </button>
         </div>
+      )}
+
+      {/* Case Sharing & Delegation Modal */}
+      <CaseSharingModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        pelaks={pelaks}
+        initialSelectedCaseIds={preSelectedCaseIdsForShare}
+        grants={grants}
+        onRefreshGrants={refreshGrants}
+        onSwitchToDelegatedSession={handleSwitchToDelegatedSession}
+      />
+
+      {/* Delegated Access Verification Gate Modal (for links with PIN) */}
+      {pendingGrantForGate && (
+        <DelegatedAccessGateModal
+          grant={pendingGrantForGate}
+          isOpen={!!pendingGrantForGate}
+          onSuccess={(verifiedGrant) => {
+            setActiveDelegatedSession({
+              grant: verifiedGrant,
+              authenticatedAt: new Date().toISOString(),
+            });
+            setPendingGrantForGate(null);
+            if (verifiedGrant.caseIds.length > 0) {
+              setSelectedPelakId(verifiedGrant.caseIds[0]);
+            }
+          }}
+          onCancel={() => setPendingGrantForGate(null)}
+        />
       )}
 
       {/* Bottom Legal Notice & Privacy Status */}

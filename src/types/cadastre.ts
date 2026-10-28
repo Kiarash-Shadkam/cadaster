@@ -287,5 +287,56 @@ export interface VaultBackupData {
   chatSessions?: ChatSession[];
   deadlines?: LegalDeadline[];
   feeRecords?: FeeRecord[];
+  accessGrants?: SharedAccessGrant[];
 }
+
+/**
+ * سطوح سه‌گانه دسترسی به پرونده‌ها و اسناد
+ */
+export type PermissionLevel =
+  | 'view_only'      // فقط مشاهده: مطالعه اطلاعات، مدارک و سوابق بدون حق دانلود یا ویرایش
+  | 'view_download'  // مشاهده و دانلود: امکان بارگیری اسناد و خروجی چاپی، بدون حق ویرایش
+  | 'edit_upload';   // ویرایش و بارگذاری: ثبت یادداشت، آپلود سند جدید، ویرایش اطلاعات تکمیلی
+
+export type GranteeType = 'collaborator' | 'external_guest';
+
+export interface AccessAuditLog {
+  id: string;
+  timestamp: string; // ISO
+  action:
+    | 'login'
+    | 'view_case'
+    | 'download_document'
+    | 'upload_document'
+    | 'edit_case'
+    | 'failed_pin';
+  caseId?: string;
+  caseNumber?: string;
+  documentTitle?: string;
+  details?: string;
+  ipPlaceholder?: string;
+}
+
+export interface SharedAccessGrant {
+  id: string;                       // e.g. "grant_171420..."
+  title: string;                    // عنوان مجوز تفویض دسترسی
+  granteeName: string;              // نام همکار یا شخص مهمان (مثلا: مهندس رضایی - کارشناس ثبتی)
+  granteeType: GranteeType;         // نوع گیرنده: همکار دفتری یا پیوند امن مهمان
+  caseIds: string[];                // شناسه‌های پرونده‌های منتخب
+  permissionLevel: PermissionLevel; // سطح دسترسی
+  pinCode?: string;                 // رمز عبور امنیتی ۴ الی ۶ رقمی (اختیاری یا اجباری)
+  createdAt: string;                // تاریخ ایجاد
+  expiresAt: string;                // تاریخ و زمان دقیق انقضا
+  status: 'active' | 'revoked' | 'expired';
+  revokedAt?: string;
+  accessCount: number;              // تعداد دفعات ورود موفق
+  lastAccessedAt?: string;
+  auditLogs: AccessAuditLog[];      // تاریخچه ممیزی کامل اقدامات
+}
+
+export interface DelegatedSession {
+  grant: SharedAccessGrant;
+  authenticatedAt: string;
+}
+
 

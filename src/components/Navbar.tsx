@@ -16,8 +16,9 @@ import {
   Search,
   RotateCcw,
   GripVertical,
+  Share2,
 } from 'lucide-react';
-import { PelakNode } from '../types/cadastre';
+import { PelakNode, DelegatedSession } from '../types/cadastre';
 import { toPersianDigits } from '../utils/persian';
 import { useDraggableTabs } from '../hooks/useDraggableTabs';
 
@@ -46,6 +47,8 @@ interface NavbarProps {
   onExportBackup: () => void;
   onOpenSearch?: () => void;
   onOpenSecuritySettings?: () => void;
+  onOpenShareModal?: () => void;
+  activeDelegatedSession?: DelegatedSession | null;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -62,6 +65,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onExportBackup,
   onOpenSearch,
   onOpenSecuritySettings,
+  onOpenShareModal,
+  activeDelegatedSession,
 }) => {
   const {
     orderedTabs,
@@ -183,6 +188,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Ctrl K
               </kbd>
             </button>
+
+            {/* Delegation & Sharing Hub Button */}
+            {onOpenShareModal && !activeDelegatedSession && (
+              <button
+                onClick={onOpenShareModal}
+                title="مرکز اشتراک‌گذاری، تفویض پرونده‌ها و سطوح دسترسی همکاران"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-amber-200 border border-amber-500/30 rounded-lg transition-colors text-xs font-semibold shadow-sm"
+              >
+                <Share2 className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">تفویض و اشتراک</span>
+              </button>
+            )}
 
             {/* Export and Lock Buttons */}
             <button

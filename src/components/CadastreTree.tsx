@@ -17,8 +17,12 @@ import {
   Briefcase,
   FileCheck,
   Building,
+  Share2,
+  Users,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
-import { PelakNode, LegalDocument, CaseDomain } from '../types/cadastre';
+import { PelakNode, LegalDocument, CaseDomain, DelegatedSession } from '../types/cadastre';
 import { toPersianDigits, formatArea, getStatusLabel } from '../utils/persian';
 
 interface CadastreTreeProps {
@@ -30,6 +34,8 @@ interface CadastreTreeProps {
   onUpdatePelak?: (pelakId: string, updates: Partial<PelakNode>) => void;
   onGoToScanner?: () => void;
   externalStatusFilter?: string;
+  onOpenShareModal?: (caseIds?: string[]) => void;
+  activeDelegatedSession?: DelegatedSession | null;
 }
 
 export const CadastreTree: React.FC<CadastreTreeProps> = ({
@@ -41,10 +47,20 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
   onUpdatePelak,
   onGoToScanner,
   externalStatusFilter,
+  onOpenShareModal,
+  activeDelegatedSession,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>(externalStatusFilter || 'all');
   const [activeDomainFilter, setActiveDomainFilter] = useState<'all' | 'real_estate' | 'non_land'>('all');
+  const [selectedCaseIdsForBatch, setSelectedCaseIdsForBatch] = useState<string[]>([]);
+
+  const handleToggleBatchCase = (caseId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedCaseIdsForBatch((prev) =>
+      prev.includes(caseId) ? prev.filter((id) => id !== caseId) : [...prev, caseId]
+    );
+  };
 
   React.useEffect(() => {
     if (externalStatusFilter !== undefined) {
@@ -192,6 +208,7 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
     const hasChildren = children.length > 0;
     const isExpanded = expandedNodes[node.id] !== false;
     const isSelected = selectedPelakId === node.id;
+    const isBatchSelected = selectedCaseIdsForBatch.includes(node.id);
     const statusMeta = getStatusLabel(node.status);
     const docCount = getDocCountForPelak(node.id);
 
@@ -216,13 +233,35 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
         <div
           onClick={() => onSelectPelak(node.id)}
           className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all border my-1 ${
-            isSelected
+            isBatchSelected
+              ? 'bg-amber-500/20 border-amber-500/60 shadow-sm text-amber-100 ring-1 ring-amber-500/40'
+              : isSelected
               ? 'bg-amber-500/15 border-amber-500/50 shadow-sm text-amber-100'
               : 'border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/60 text-slate-300'
           }`}
           style={{ paddingRight: `${Math.max(8, level * 18)}px` }}
         >
           <div className="flex items-center gap-2 overflow-hidden">
+            {/* Batch Selection Checkbox */}
+            {!activeDelegatedSession && (
+              <button
+                type="button"
+                onClick={(e) => handleToggleBatchCase(node.id, e)}
+                className={`p-0.5 rounded transition-colors ${
+                  isBatchSelected
+                    ? 'text-amber-400'
+                    : 'text-slate-600 hover:text-slate-400 group-hover:text-slate-500'
+                }`}
+                title={isBatchSelected ? 'لغو انتخاب پرونده' : 'انتخاب پرونده جهت اشتراک‌گذاری دسته‌ای'}
+              >
+                {isBatchSelected ? (
+                  <CheckSquare className="w-4 h-4 fill-amber-500/20" />
+                ) : (
+                  <Square className="w-4 h-4" />
+                )}
+              </button>
+            )}
+
             {hasChildren ? (
               <button
                 type="button"
@@ -232,7 +271,7 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
                 {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
               </button>
             ) : (
-              <span className="w-6 inline-block" />
+              <span className="w-4 inline-block" />
             )}
 
             {node.isNonLandDossier ? (
@@ -265,7 +304,22 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Quick Share Button for single case */}
+            {onOpenShareModal && !activeDelegatedSession && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenShareModal([node.id]);
+                }}
+                className="p-1 text-slate-500 hover:text-amber-400 hover:bg-slate-800 rounded transition-colors opacity-70 group-hover:opacity-100"
+                title="اشتراک‌گذاری و تفویض این پرونده"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+
             {docCount > 0 && (
               <span className="flex items-center gap-1 text-[11px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">
                 <FileText className="w-3 h-3 text-sky-400" />
@@ -305,6 +359,16 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
+          {onOpenShareModal && !activeDelegatedSession && (
+            <button
+              onClick={() => onOpenShareModal(selectedCaseIdsForBatch.length > 0 ? selectedCaseIdsForBatch : undefined)}
+              className="flex items-center gap-1 text-xs bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 px-2.5 py-1.5 rounded-lg transition-colors"
+              title="مرکز اشتراک‌گذاری و تفویض پرونده‌ها به همکاران و کارشناسان"
+            >
+              <Share2 className="w-3.5 h-3.5 text-amber-400" />
+              تفویض دسترسی
+            </button>
+          )}
           <button
             onClick={() => handleOpenAddModal('non_land')}
             className="flex items-center gap-1 text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2.5 py-1.5 rounded-lg transition-colors shadow-sm"
@@ -416,6 +480,33 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
 
           {/* Tree Content */}
           <div className="flex-1 overflow-y-auto space-y-3 pr-1 pl-1 mt-1">
+            {/* Batch Selection Action Bar */}
+            {selectedCaseIdsForBatch.length > 0 && !activeDelegatedSession && (
+              <div className="bg-amber-950/70 border border-amber-500/50 rounded-xl p-2.5 px-3 flex items-center justify-between gap-2 shadow-lg animate-in slide-in-from-top-2 mb-2">
+                <div className="flex items-center gap-2 text-xs text-amber-200">
+                  <CheckSquare className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="font-bold">
+                    {toPersianDigits(selectedCaseIdsForBatch.length)} پرونده انتخاب شد
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCaseIdsForBatch([])}
+                    className="text-[11px] text-slate-400 hover:text-white underline mr-1"
+                  >
+                    لغو
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onOpenShareModal?.(selectedCaseIdsForBatch)}
+                  className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  اشتراک‌گذاری و تعیین دسترسی
+                </button>
+              </div>
+            )}
+
             {/* Real Estate Section */}
             {(activeDomainFilter === 'all' || activeDomainFilter === 'real_estate') && mainRealEstatePelaks.length > 0 && (
               <div>
