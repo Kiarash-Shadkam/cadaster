@@ -79,11 +79,11 @@ export const LawyerDesk: React.FC<LawyerDeskProps> = ({
     { label: string; icon: React.ComponentType<{ className?: string }>; badge?: React.ReactNode }
   > = {
     drafts: {
-      label: 'تنظیم لوایح و دادخواست‌ها',
+      label: 'لوایح و دادخواست',
       icon: FileText,
     },
     deadlines: {
-      label: 'مواعد قانونی و ثنا',
+      label: 'مواعد قانونی',
       icon: Calendar,
       badge:
         urgentDeadlinesCount > 0 ? (
@@ -93,15 +93,15 @@ export const LawyerDesk: React.FC<LawyerDeskProps> = ({
         ) : null,
     },
     fees: {
-      label: 'حسابداری حق‌الوکاله و تمبر ۱۰۳',
+      label: 'محاسبه حق‌الوکاله',
       icon: Coins,
     },
     conflicts: {
-      label: 'استعلام تعارض منافع',
+      label: 'تعارض منافع',
       icon: ShieldAlert,
     },
     reports: {
-      label: 'گزارش شکیل پرونده موکل',
+      label: 'گزارش موکل',
       icon: FileSpreadsheet,
     },
   };
@@ -151,15 +151,14 @@ export const LawyerDesk: React.FC<LawyerDeskProps> = ({
           </div>
 
           {/* Controls: Reset Order & Lock Toggle */}
-          <div className="flex items-center gap-2 shrink-0 border-r border-slate-800 pr-2.5 mr-1">
+          <div className="flex items-center gap-1.5 shrink-0">
             {isOrderCustomized && (
               <button
                 onClick={resetOrder}
-                title="بازنشانی ترتیب تب‌های میز کار وکیل"
-                className="flex items-center gap-1 px-2 py-1.5 text-xs text-slate-400 hover:text-amber-300 hover:bg-slate-800/70 rounded-lg border border-transparent hover:border-slate-700 transition-all"
+                title="بازنشانی چیدمان تب‌ها به حالت اولیه"
+                className="p-1.5 text-slate-400 hover:text-amber-300 hover:bg-slate-800 rounded-lg transition-all"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline text-[11px]">بازنشانی</span>
               </button>
             )}
 
@@ -167,33 +166,21 @@ export const LawyerDesk: React.FC<LawyerDeskProps> = ({
               onClick={toggleLock}
               title={
                 isLocked
-                  ? 'چینش ابزارهای میز کار قفل است (جهت فعال‌سازی جابجایی تب‌ها با Drag & Drop کلیک کنید)'
-                  : 'جابجایی ابزارهای میز کار فعال است (جهت قفل کردن چیدمان کلیک کنید)'
+                  ? 'چینش تب‌ها قفل است (جهت فعال‌سازی جابجایی تب‌ها با کشیدن کلیک کنید)'
+                  : 'جابجایی تب‌ها فعال است (جهت تثبیت چینش کلیک کنید)'
               }
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+              className={`p-1.5 rounded-lg text-xs font-medium border transition-all ${
                 isLocked
-                  ? 'bg-slate-950/80 text-slate-400 border-slate-800 hover:text-white hover:border-slate-700'
-                  : 'bg-amber-500/15 text-amber-300 border-amber-500/50 shadow-sm shadow-amber-500/10'
+                  ? 'bg-slate-950/80 text-slate-500 border-slate-800 hover:text-slate-300'
+                  : 'bg-amber-500/15 text-amber-300 border-amber-500/50'
               }`}
             >
               {isLocked ? (
-                <>
-                  <Lock className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="hidden sm:inline text-[11px]">قفل تب‌ها</span>
-                </>
+                <Lock className="w-3.5 h-3.5" />
               ) : (
-                <>
-                  <Unlock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                  <span className="hidden sm:inline text-[11px] font-bold">جابجایی آزاد</span>
-                </>
+                <Unlock className="w-3.5 h-3.5 text-amber-400" />
               )}
             </button>
-
-            {/* Lawyer Badge */}
-            <div className="hidden xl:flex items-center gap-2 text-xs text-slate-400 bg-slate-950/70 px-3 py-1.5 rounded-xl border border-slate-800/80">
-              <Scale className="w-4 h-4 text-amber-400" />
-              <span className="font-semibold text-slate-200">میز کار تخصصی وکیل دادگستری</span>
-            </div>
           </div>
         </div>
       </div>

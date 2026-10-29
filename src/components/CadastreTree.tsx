@@ -375,39 +375,19 @@ export const CadastreTree: React.FC<CadastreTreeProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
-          {onOpenShareModal && !activeDelegatedSession && (
-            <button
-              onClick={() => onOpenShareModal(selectedCaseIdsForBatch.length > 0 ? selectedCaseIdsForBatch : undefined)}
-              className="flex items-center gap-1 text-xs bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 px-2.5 py-1.5 rounded-lg transition-colors"
-              title="مرکز اشتراک‌گذاری و تفویض پرونده‌ها به همکاران و کارشناسان"
-            >
-              <Share2 className="w-3.5 h-3.5 text-amber-400" />
-              تفویض دسترسی
-            </button>
-          )}
-          {onOpenClaimModal && !activeDelegatedSession && (
-            <button
-              onClick={onOpenClaimModal}
-              className="flex items-center gap-1 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1.5 rounded-lg transition-colors"
-              title="دریافت و استقرار پرونده تفویض‌شده از دیگر اکانت‌ها و همکاران"
-            >
-              <FolderDown className="w-3.5 h-3.5 text-emerald-400" />
-              دریافت پرونده مشترک
-            </button>
-          )}
           <button
             onClick={() => handleOpenAddModal('non_land')}
             className="flex items-center gap-1 text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2.5 py-1.5 rounded-lg transition-colors shadow-sm"
           >
             <Briefcase className="w-3.5 h-3.5" />
-            تشکیل پرونده جدید
+            پرونده جدید
           </button>
           <button
             onClick={() => handleOpenAddModal('land', 'main')}
             className="flex items-center gap-1 text-xs bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 px-2.5 py-1.5 rounded-lg transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
-            ثبت پلاک ثبتی
+            پلاک ثبتی
           </button>
         </div>
       </div>

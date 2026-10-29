@@ -101,7 +101,7 @@ export const CaseStatusChart: React.FC<CaseStatusChartProps> = ({
   onSelectPelakStatus,
   selectedStatus,
 }) => {
-  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<ChartViewMode>('status');
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -235,6 +235,24 @@ export const CaseStatusChart: React.FC<CaseStatusChartProps> = ({
 
         {/* View mode tabs + Collapse toggle */}
         <div className="flex items-center gap-2">
+          {!isExpanded && (
+            <div className="hidden sm:flex items-center gap-2 text-xs">
+              <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md text-[11px] font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                تثبیت‌شده: {toPersianDigits(validCount)}
+              </span>
+              {riskCount > 0 && (
+                <span className="flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md text-[11px] font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  دارای ریسک/تعارض: {toPersianDigits(riskCount)}
+                </span>
+              )}
+              <span className="text-slate-400 text-[11px]">
+                شاخص سلامت: <strong className="text-white font-mono">{toPersianDigits(healthPercent)}٪</strong>
+              </span>
+            </div>
+          )}
+
           {isExpanded && (
             <div className="bg-slate-950/80 p-0.5 rounded-lg border border-slate-800 flex items-center text-xs">
               <button
@@ -275,18 +293,18 @@ export const CaseStatusChart: React.FC<CaseStatusChartProps> = ({
 
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors text-xs flex items-center gap-1"
-            title={isExpanded ? 'بستن داشبورد نمودار' : 'باز کردن داشبورد نمودار'}
+            className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors text-xs flex items-center gap-1.5 font-medium shadow-sm"
+            title={isExpanded ? 'بستن داشبورد نمودار' : 'مشاهده نمودار تحلیلی و آماری'}
           >
             {isExpanded ? (
               <>
-                <span className="text-[11px] hidden sm:inline">کوچک‌نمایی</span>
-                <ChevronUp className="w-4 h-4 text-slate-400" />
+                <span className="text-[11px]">بستن نمودار</span>
+                <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
               </>
             ) : (
               <>
-                <span className="text-[11px] hidden sm:inline">مشاهده نمودار</span>
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <span className="text-[11px]">نمودار تحلیلی</span>
+                <ChevronDown className="w-3.5 h-3.5 text-amber-400" />
               </>
             )}
           </button>
