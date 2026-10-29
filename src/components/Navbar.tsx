@@ -18,6 +18,8 @@ import {
   GripVertical,
   Share2,
   FolderDown,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { PelakNode, DelegatedSession } from '../types/cadastre';
 import { toPersianDigits } from '../utils/persian';
@@ -52,6 +54,8 @@ interface NavbarProps {
   onOpenClaimModal?: () => void;
   claimedCasesCount?: number;
   activeDelegatedSession?: DelegatedSession | null;
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -72,6 +76,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenClaimModal,
   claimedCasesCount,
   activeDelegatedSession,
+  theme = 'dark',
+  onToggleTheme,
 }) => {
   const {
     orderedTabs,
@@ -227,6 +233,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                   <span className="hidden sm:inline">رمز</span>
+                </button>
+              )}
+
+              {/* Dark / Day Mode Toggle */}
+              {onToggleTheme && (
+                <button
+                  onClick={onToggleTheme}
+                  title={theme === 'dark' ? 'تغییر به تم روشن و روز (Day Mode)' : 'تغییر به تم تاریک و شب (Dark Mode)'}
+                  className="flex items-center gap-1 px-2 py-1 hover:bg-slate-800 text-slate-400 hover:text-white rounded transition-colors text-xs"
+                >
+                  {theme === 'dark' ? (
+                    <>
+                      <Sun className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="hidden xl:inline text-[11px]">روز</span>
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="w-3.5 h-3.5 text-sky-400" />
+                      <span className="hidden xl:inline text-[11px]">شب</span>
+                    </>
+                  )}
                 </button>
               )}
 

@@ -63,6 +63,29 @@ function AppInner() {
   });
   const [isSecuritySettingsOpen, setIsSecuritySettingsOpen] = useState<boolean>(false);
 
+  // Theme Mode: 'dark' (default obsidian) vs 'light' (clean daylight)
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('cadaster_theme_mode');
+    if (saved === 'light' || saved === 'dark') return saved;
+    return 'dark';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('cadaster_theme_mode', theme);
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.classList.add('light');
+      root.classList.remove('dark');
+    } else {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   // Inactivity auto-lock based on lawyer's security profile configuration
   useEffect(() => {
     if (isVaultLocked) return;
@@ -780,6 +803,8 @@ function AppInner() {
         onOpenClaimModal={() => setIsClaimModalOpen(true)}
         claimedCasesCount={claimedCases.length}
         activeDelegatedSession={activeDelegatedSession}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Workspace Body */}
