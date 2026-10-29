@@ -206,9 +206,18 @@ function hmacSha1(key: Uint8Array, message: Uint8Array): Uint8Array {
 }
 
 /**
- * محاسبه فوری کد ۶ رقمی پویای Authenticator (RFC 6238 TOTP)
+ * مدت زمان اعتبار کد پویا: ۱۲۰ ثانیه (۲ دقیقه کامل)
  */
-export function getLiveTotpCode(secretBase32: string, timestampMs = Date.now(), period = 30): string {
+export const TOTP_PERIOD_SECONDS = 120;
+
+/**
+ * محاسبه فوری کد ۶ رقمی پویای Authenticator (RFC 6238 TOTP با دوره ۲ دقیقه‌ای / ۱۲۰ ثانیه)
+ */
+export function getLiveTotpCode(
+  secretBase32: string,
+  timestampMs = Date.now(),
+  period = TOTP_PERIOD_SECONDS
+): string {
   try {
     const key = base32ToBytes(secretBase32);
     const counter = Math.floor(timestampMs / 1000 / period);
@@ -237,20 +246,22 @@ export function getLiveTotpCode(secretBase32: string, timestampMs = Date.now(), 
 }
 
 /**
- * اعتبارسنجی کد ۶ رقمی وارد شده توسط کاربر با احتساب تلورانس زمانی (۳۰ ثانیه قبل و بعد)
+ * اعتبارسنجی کد ۶ رقمی وارد شده توسط کاربر با دوره ۲ دقیقه‌ای (۱۲۰ ثانیه)
+ * به همراه احتساب تلورانس زمانی و سازگاری با کلاینت‌های ۳۰ ثانیه‌ای
  */
 export function verifyTotpCode(
   secretBase32: string,
   inputCode: string,
-  windowToleranceSteps = 1
+  windowToleranceSteps = 1,
+  period = TOTP_PERIOD_SECONDS
 ): boolean {
   if (!secretBase32 || !inputCode) return false;
   const cleanInput = inputCode.replace(/\D/g, '').trim();
   if (cleanInput.length !== 6) return false;
 
   const now = Date.now();
-  const period = 30;
 
+  // ۱. بررسی بر مبنای چرخه اصلی ۲ دقیقه‌ای (۱۲۰ ثانیه)
   for (let step = -windowToleranceSteps; step <= windowToleranceSteps; step++) {
     const checkTime = now + step * period * 1000;
     const expected = getLiveTotpCode(secretBase32, checkTime, period);
@@ -258,28 +269,41 @@ export function verifyTotpCode(
       return true;
     }
   }
+
+  // ۲. سازگاری پشتیبان: در صورتی که نرم‌افزار کاربر روی چرخه پیش‌فرض ۳۰ ثانیه‌ای باشد
+  if (period !== 30) {
+    for (let step = -1; step <= 1; step++) {
+      const checkTime = now + step * 30 * 1000;
+      const expected = getLiveTotpCode(secretBase32, checkTime, 30);
+      if (expected === cleanInput) {
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
 /**
- * ثانیه‌های باقیمانده تا تغییر کد بعدی در پنجره ۳۰ ثانیه‌ای
+ * ثانیه‌های باقیمانده تا تغییر کد بعدی در پنجره ۲ دقیقه‌ای (۱۲۰ ثانیه‌ای)
  */
-export function getTotpRemainingSeconds(period = 30): number {
+export function getTotpRemainingSeconds(period = TOTP_PERIOD_SECONDS): number {
   const currentSec = Math.floor(Date.now() / 1000) % period;
   return period - currentSec;
 }
 
 /**
- * ایجاد لینک استاندارد otpauth:// برای ثبت مستقیم در نرم‌افزارهای Authenticator
+ * ایجاد لینک استاندارد otpauth:// با دوره ۲ دقیقه‌ای (period=120) برای ثبت در نرم‌افزارهای Authenticator
  */
 export function generateTotpAuthUri(
   accountName: string,
   secretBase32: string,
-  issuer = 'CadasterVault'
+  issuer = 'CadasterVault',
+  period = TOTP_PERIOD_SECONDS
 ): string {
   const encIssuer = encodeURIComponent(issuer);
   const encAccount = encodeURIComponent(accountName || 'کاربر_مجاز');
-  return `otpauth://totp/${encIssuer}:${encAccount}?secret=${secretBase32}&issuer=${encIssuer}&algorithm=SHA1&digits=6&period=30`;
+  return `otpauth://totp/${encIssuer}:${encAccount}?secret=${secretBase32}&issuer=${encIssuer}&algorithm=SHA1&digits=6&period=${period}`;
 }
 
 /* =========================================================================

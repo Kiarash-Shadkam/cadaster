@@ -64,7 +64,7 @@ export const ClaimDelegatedCaseModal: React.FC<ClaimDelegatedCaseModalProps> = (
   const [showPassphrase, setShowPassphrase] = useState(false);
   const [gateError, setGateError] = useState<string | null>(null);
   const [liveCode, setLiveCode] = useState('');
-  const [remainingSeconds, setRemainingSeconds] = useState(30);
+  const [remainingSeconds, setRemainingSeconds] = useState(120);
   const [showHelper, setShowHelper] = useState(false);
 
   // Result state
@@ -350,7 +350,7 @@ export const ClaimDelegatedCaseModal: React.FC<ClaimDelegatedCaseModalProps> = (
                   {showHelper && liveCode && (
                     <div className="mt-2 pt-2 border-t border-amber-500/20 flex items-center justify-between text-[11px]">
                       <span className="text-slate-400">
-                        کد زنده شبیه‌ساز: <strong className="font-mono text-white">{liveCode}</strong> ({remainingSeconds}ثانیه)
+                        کد زنده شبیه‌ساز (اعتبار ۲ دقیقه): <strong className="font-mono text-white">{liveCode}</strong> ({toPersianDigits(Math.floor(remainingSeconds / 60))}:{toPersianDigits((remainingSeconds % 60).toString().padStart(2, '0'))} - {toPersianDigits(remainingSeconds)} ثانیه)
                       </span>
                       <button
                         type="button"

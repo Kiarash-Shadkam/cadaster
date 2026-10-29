@@ -50,7 +50,7 @@ export const DelegatedAccessGateModal: React.FC<DelegatedAccessGateModalProps> =
   const [showPassphrase, setShowPassphrase] = useState(false);
   const [showSimulator, setShowSimulator] = useState(false);
   const [liveCode, setLiveCode] = useState('');
-  const [remainingSeconds, setRemainingSeconds] = useState(30);
+  const [remainingSeconds, setRemainingSeconds] = useState(120);
   const [copiedKey, setCopiedKey] = useState(false);
 
   // Keep live TOTP and countdown updated for the companion authenticator helper
@@ -329,14 +329,14 @@ export const DelegatedAccessGateModal: React.FC<DelegatedAccessGateModalProps> =
                         <Clock className="w-3.5 h-3.5 text-amber-400" />
                         <span>انقضای کد:</span>
                         <span className="font-mono text-amber-300 font-bold">
-                          {toPersianDigits(remainingSeconds)} ثانیه
+                          {toPersianDigits(Math.floor(remainingSeconds / 60))}:{toPersianDigits((remainingSeconds % 60).toString().padStart(2, '0'))} ({toPersianDigits(remainingSeconds)} ثانیه)
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800">
                       <div>
-                        <div className="text-[10px] text-slate-400">کد پویای فعال لحظه‌ای:</div>
+                        <div className="text-[10px] text-slate-400">کد پویای فعال لحظه‌ای (اعتبار ۲ دقیقه):</div>
                         <div className="font-mono text-base font-bold text-emerald-400 tracking-widest mt-0.5">
                           {liveCode.slice(0, 3)} {liveCode.slice(3)}
                         </div>
@@ -349,11 +349,11 @@ export const DelegatedAccessGateModal: React.FC<DelegatedAccessGateModalProps> =
                       </div>
                     </div>
 
-                    {/* Countdown Progress Bar */}
+                    {/* Countdown Progress Bar (120s / 2min) */}
                     <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                       <div
                         className="bg-emerald-500 h-full transition-all duration-1000 ease-linear"
-                        style={{ width: `${(remainingSeconds / 30) * 100}%` }}
+                        style={{ width: `${(remainingSeconds / 120) * 100}%` }}
                       />
                     </div>
                   </div>

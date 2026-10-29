@@ -380,7 +380,7 @@ export const CaseSharingModal: React.FC<CaseSharingModalProps> = ({
                             {liveTotpCode.slice(0, 3)} {liveTotpCode.slice(3)}
                           </div>
                         </div>
-                        <span className="text-[10px] text-slate-500">هر ۳۰ ثانیه تغییر می‌کند</span>
+                        <span className="text-[10px] text-emerald-400 font-medium">هر ۲ دقیقه (۱۲۰ ثانیه) تغییر می‌کند</span>
                       </div>
                     </div>
                   </div>
